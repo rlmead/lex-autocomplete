@@ -6,7 +6,7 @@ The [data used for this project](https://static1.squarespace.com/static/61819f62
 
 ## Training the model
 ### Get the data
-Download the `Main View` of the `Codes Summed` sheet in the `OTT Combined Codes` base ([here](https://airtable.com/appp6FXqZn3f9OqZ7/tblCEGDPjQRiqyFKE/viwuISWqMnfkhG1j1?blocks=hide)) as a CSV file.
+Download the `Main View` of the `Codes Summed` sheet in the `OTT Combined Codes` base ([here](https://airtable.com/appp6FXqZn3f9OqZ7/tblCEGDPjQRiqyFKE/viwuISWqMnfkhG1j1?blocks=hide)) as a CSV file, and store it in the `data/` directory (Git will ignore it there).
 
 ### Set up your Python environment
 1. `python -m venv venv`
