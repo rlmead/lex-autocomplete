@@ -1,20 +1,23 @@
 import { useEffect, useState } from 'react';
-import script from '../python/ngram-model.py';
+import getWord from '../python/ngram-model.py';
 
-const Model = () => {
+function Model(props) {
+  const numWords = props['numWords'];
   const [output, setOutput] = useState('');
 
-  const runScript = code => {
+  const runScript = inputArray => {
+    var [code, numWords] = inputArray
     window.pyodide.loadPackage([]).then(() => {
-      const output = window.pyodide.runPython(code);
+      const output = window.pyodide.runPython(code + 'getWord(' + numWords + ')');
       setOutput(output);
     })
   }
 
   useEffect(() => {
     window.languagePluginLoader.then(() => {
-      fetch(script)
-        .then(src => src.text())
+      fetch(getWord)
+        .then(script => script.text())
+        .then(code => [code, numWords])
         .then(runScript)
     })
   })

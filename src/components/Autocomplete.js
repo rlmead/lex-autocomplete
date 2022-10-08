@@ -7,7 +7,7 @@ function Autocomplete() {
     <Container>
       <Row className="mt-4 mb-5">
         <Col md={{ size: 6, offset: 3 }}>
-          <Model/>
+          <Model numWords={3} />
         </Col>
       </Row>
     </Container>

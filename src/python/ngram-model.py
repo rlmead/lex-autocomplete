@@ -1,4 +1,2 @@
-def getWord():
-  return "word"
-
-getWord()
+def getWord(numWords):
+  return "word " * numWords
