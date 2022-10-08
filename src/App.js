@@ -18,7 +18,7 @@ function App() {
       <Navbar
         expand="md"
         light
-        className="navbar-dark sticky-top text-light bg-primary">
+        className="navbar-dark sticky-top text-white bg-primary">
         <h1>OTT Text Prediction</h1>
       </Navbar>
       <Nav
@@ -33,7 +33,7 @@ function App() {
                 key={index}
                 onClick={() => setView(item)} >
                 <NavLink
-                  className={item !== view ? "text-light" : "text-info"}>
+                  className={item !== view ? "text-white" : "text-info"}>
                   {item}
                 </NavLink>
               </NavItem>
