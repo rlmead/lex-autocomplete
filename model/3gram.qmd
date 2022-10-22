@@ -12,7 +12,9 @@ format:
 
 ## Setup
 
-I'm going to try to keep the install size small, so rather than installing the whole tidyverse metapackage, I'll just install the specific libraries I use
+I'm going to try to keep the install size small, so rather than installing the whole tidyverse metapackage, I'll just install the specific libraries I use.
+
+Requires `renv` and `reticulate`.
 
 ```{r}
 #| label: install
@@ -25,7 +27,10 @@ renv::install("stringr")
 renv::install("purrr")
 renv::install("tidyr")
 renv::install("tidytext")
+```
 
+```{r}
+renv::install("spacyr")
 ```
 
 ```{r}
@@ -35,6 +40,27 @@ library(stringr)
 library(purrr)
 library(tidyr)
 library(tidytext)
+```
+
+```{r}
+library(spacyr)
+```
+
+You have to sidestep spacyr's defaults for python versions
+
+```{bash}
+#| eval: false
+#| filename: "bash"
+conda create --yes --name spacy_condaenv python=3.8 spacy -c conda-forge
+```
+
+```{r}
+#| eval: false
+spacy_install()
+```
+
+```{r}
+spacy_initialize(model = "en_core_web_sm")
 ```
 
 ## Load Raw Data
@@ -54,7 +80,8 @@ Focusing in on the qualitative comments.
 
 ```{r}
 dat %>%
-  select(response, qualitative_response) -> corpus
+  select(response, qualitative_response) %>%
+  mutate(qualitative_response = str_replace_all(qualitative_response, "\\s+", " "))-> corpus
 ```
 
 ```{r}
@@ -72,15 +99,115 @@ pad_vector <- function(x, n = 2, start_symbol = "<s>", end_symbol = "</s>"){
   out <- c(start_pad, x, end_pad)
   return(out)
 }
+
 ```
 
 ```{r}
-corpus %>%
-  unnest_tokens(input = qualitative_response,
-                output = "word_k",
-                token = "words",
-                strip_punct = F) %>%
-  group_by(response) %>%
+comment_parse <- spacy_parse(corpus$qualitative_response)
+```
+
+```{r}
+comment_parse %>%
+  group_by(doc_id)
+```
+
+```{r}
+pad_df <- function(df, n = 2, start_symbol = "<s>", end_symbol = "</s>"){
+  start_pad <- tibble(token = rep(start_symbol, times = n))
+  end_pad <- tibble(token = rep(end_symbol, times = n))
+  out <- bind_rows(start_pad, df, end_pad) %>%
+          replace_na(list(sentence_id = 0, token_id = 0, pos = '', entity = '')) %>%
+          mutate(lemma = token)
+  return(out)
+}
+```
+
+```{r}
+comment_parse %>%
+  group_by(doc_id) %>%
   nest() %>%
-  mutate(padded = map(data, ~tibble(word_k = pad_vector(.x$word_k))))
+  mutate(padded = map(data, pad_df)) -> pad_nest
+```
+
+```{r}
+pad_nest %>%
+  select(-data) %>%
+  unnest(padded) %>%
+  select(doc_id, token, pos, entity) %>%
+  mutate(word_i = lag(tolower(token), 2),
+         word_j = lag(tolower(token), 1),
+         word_k = tolower(token)) %>%
+  drop_na() -> trigrams
+```
+
+```{r}
+trigrams %>%
+  ungroup() %>%
+  count(word_i, word_j) %>%
+  rename(bigram_count = n)-> bigram_count
+```
+
+```{r}
+trigrams %>%
+ ungroup() %>%
+ count(word_i, word_j, word_k) %>%
+ rename(trigram_count = n) -> trigram_count
+```
+
+```{r}
+trigrams %>%
+  ungroup() %>%
+  count(word_k, pos, entity) %>%
+  group_by(word_k) %>%
+  arrange(desc(n)) %>%
+  slice(1) %>%
+  select(-n)-> pos_ent
+```
+
+```{r}
+trigram_count %>%
+  left_join(bigram_count) %>%
+  left_join(pos_ent) %>%
+  mutate(cond_prob = trigram_count/bigram_count)->model
+```
+
+```{r}
+model %>%
+  filter(word_i == "green", word_j == "spaces") %>%
+  slice_sample(n = 1, weight_by = cond_prob)
+```
+
+```{r}
+generate <- function(df, w_i = "<s>", w_j = "<s>", max = 100){
+  out <- vector()
+  x = 0
+  stop = FALSE
+  while(x < max & !stop){
+    sample = df %>% 
+                filter(word_i == w_i, word_j == w_j) %>% 
+                slice_sample(n = 1, weight_by = cond_prob)
+    if(sample$word_k == "</s>") {
+      stop = TRUE
+      break
+    }
+    if(length(out) == 0){
+      paste_word = str_to_title(sample$word_k)
+    } else if(sample$entity != ''){
+      paste_word = str_to_title(sample$word_k)
+    }else if (w_j == "."){
+      paste_word = str_to_title(sample$word_k)
+    }else{
+      paste_word = sample$word_k
+    }
+    out <- c(out, paste_word)
+    w_i = w_j
+    w_j = sample$word_k
+    x = x+1
+  }
+  return(out)
+}
+```
+
+```{r}
+str_c(generate(model), collapse = " ")
 ```
