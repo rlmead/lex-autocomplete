@@ -1,0 +1,86 @@
+---
+title: "3gram Model"
+author: "Josef Fruehwald"
+date: today
+editor: visual
+license: MIT
+format:
+  html:
+    embed-resources: true
+    theme: darkly
+---
+
+## Setup
+
+I'm going to try to keep the install size small, so rather than installing the whole tidyverse metapackage, I'll just install the specific libraries I use
+
+```{r}
+#| label: install
+#| eval: false
+# ensure renv is activated
+# source(".Rprofile)
+renv::install("dplyr")
+renv::install("readr")
+renv::install("stringr")
+renv::install("purrr")
+renv::install("tidyr")
+renv::install("tidytext")
+
+```
+
+```{r}
+library(dplyr)
+library(readr)
+library(stringr)
+library(purrr)
+library(tidyr)
+library(tidytext)
+```
+
+## Load Raw Data
+
+```{r}
+dat <- read_csv("../data/Codes Summed-Main View.csv") %>%
+          rename_with(~tolower(gsub("\\s", "_", .x)))
+```
+
+Checking to ensure there is a unique value of `Response` for every row.
+
+```{r}
+nrow(dat) == length(unique(dat$response))
+```
+
+Focusing in on the qualitative comments.
+
+```{r}
+dat %>%
+  select(response, qualitative_response) -> corpus
+```
+
+```{r}
+#' Pad out a vector
+#' 
+#' This pads out a vector on both ends with start and end symbols
+#' @param x the input vector
+#' @param n the size of the left and right padding
+#' @param start_symbol the start pad symbol
+#' @param end_symbol the end pad symbol
+#' @returns A vector \code{(2*n) + len(x)} long
+pad_vector <- function(x, n = 2, start_symbol = "<s>", end_symbol = "</s>"){
+  start_pad = rep(start_symbol, times = n)
+  end_pad = rep(end_symbol, times = n)
+  out <- c(start_pad, x, end_pad)
+  return(out)
+}
+```
+
+```{r}
+corpus %>%
+  unnest_tokens(input = qualitative_response,
+                output = "word_k",
+                token = "words",
+                strip_punct = F) %>%
+  group_by(response) %>%
+  nest() %>%
+  mutate(padded = map(data, ~tibble(word_k = pad_vector(.x$word_k))))
+```
