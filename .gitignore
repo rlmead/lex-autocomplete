@@ -1,3 +1,7 @@
+# Firebase
+.firebase
+firebaseconfig.js
+
 # Python environment
 venv
 
