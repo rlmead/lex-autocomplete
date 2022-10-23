@@ -278,17 +278,6 @@
         "rlang"
       ]
     },
-    "hunspell": {
-      "Package": "hunspell",
-      "Version": "3.0.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "656219b6f3f605499d7cdbe208656639",
-      "Requirements": [
-        "Rcpp",
-        "digest"
-      ]
-    },
     "janeaustenr": {
       "Package": "janeaustenr",
       "Version": "1.0.0",
@@ -614,27 +603,6 @@
         "rlang",
         "vctrs",
         "withr"
-      ]
-    },
-    "tidytext": {
-      "Package": "tidytext",
-      "Version": "0.3.4",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "baf783b244a36fe5d11069b53f32a136",
-      "Requirements": [
-        "Matrix",
-        "dplyr",
-        "generics",
-        "hunspell",
-        "janeaustenr",
-        "lifecycle",
-        "purrr",
-        "rlang",
-        "stringr",
-        "tibble",
-        "tokenizers",
-        "vctrs"
       ]
     },
     "tinytex": {

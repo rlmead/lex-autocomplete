@@ -30,8 +30,7 @@ library(readr)
 library(stringr)
 library(purrr)
 library(tidyr)
-library(tidytext)
-library(hunspell)
+library(rjson)
 ```
 
 ```{r}
@@ -266,4 +265,51 @@ generate <- function(df, w_i = "<s>", w_j = "<s>", max = 10000){
 
 ```{r}
 generate(model)
+```
+
+## Prepare model for json
+
+```{r}
+model %>%
+  group_by(word_i, word_j) %>%
+  arrange(cond_prob) %>%
+  mutate(sum_prob = cumsum(cond_prob)) ->model_prep
+```
+
+```{r}
+outer_list <- list()
+```
+
+```{r}
+model_prep %>%
+  group_by(word_i, word_j) %>%
+  nest() %>%
+  group_by(word_i) %>%
+  nest() -> all_nest
+```
+
+```{r}
+for(i in seq_along(all_nest$word_i)){
+  w_i <- all_nest$word_i[i]
+  outer_list[[w_i]] <- list()
+  inner_j <- all_nest$data[[i]]
+  for(j in seq_along(inner_j$word_j)){
+    w_j <- inner_j$word_j[j]
+    outer_list[[w_i]][[w_j]] <- list()
+    inner_k <- inner_j$data[[j]]
+    
+    outer_list[[w_i]][[w_j]][["wordK"]] <- inner_k$word_k
+    outer_list[[w_i]][[w_j]][["prob"]] <- inner_k$sum_prob
+    outer_list[[w_i]][[w_j]][["lean"]] <- inner_k$dir
+  }
+}
+```
+
+```{r}
+jsonData <- toJSON(outer_list, indent = 2)
+```
+
+```{r}
+#| eval: false
+write(jsonData, file = "../data/model.json")
 ```
