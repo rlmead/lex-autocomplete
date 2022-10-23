@@ -21,16 +21,7 @@ Requires `renv` and `reticulate`.
 #| eval: false
 # ensure renv is activated
 # source(".Rprofile)
-renv::install("dplyr")
-renv::install("readr")
-renv::install("stringr")
-renv::install("purrr")
-renv::install("tidyr")
-renv::install("tidytext")
-```
-
-```{r}
-renv::install("spacyr")
+renv::refresh()
 ```
 
 ```{r}
@@ -40,6 +31,7 @@ library(stringr)
 library(purrr)
 library(tidyr)
 library(tidytext)
+library(hunspell)
 ```
 
 ```{r}
@@ -52,15 +44,18 @@ You have to sidestep spacyr's defaults for python versions
 #| eval: false
 #| filename: "bash"
 conda create --yes --name spacy_condaenv python=3.8 spacy -c conda-forge
+
+# only if you need to unstall rust
+#curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 ```{r}
 #| eval: false
-spacy_install()
+#spacy_install(lang_models = "en_core_web_trf")
 ```
 
 ```{r}
-spacy_initialize(model = "en_core_web_sm")
+spacy_initialize(model = "en_core_web_trf")
 ```
 
 ## Load Raw Data
@@ -74,6 +69,7 @@ Checking to ensure there is a unique value of `Response` for every row.
 
 ```{r}
 nrow(dat) == length(unique(dat$response))
+nrow(dat)
 ```
 
 Focusing in on the qualitative comments.
@@ -103,12 +99,8 @@ pad_vector <- function(x, n = 2, start_symbol = "<s>", end_symbol = "</s>"){
 ```
 
 ```{r}
+Sys.setenv(TOKENIZERS_PARALLELISM="false")
 comment_parse <- spacy_parse(corpus$qualitative_response)
-```
-
-```{r}
-comment_parse %>%
-  group_by(doc_id)
 ```
 
 ```{r}
@@ -116,14 +108,78 @@ pad_df <- function(df, n = 2, start_symbol = "<s>", end_symbol = "</s>"){
   start_pad <- tibble(token = rep(start_symbol, times = n))
   end_pad <- tibble(token = rep(end_symbol, times = n))
   out <- bind_rows(start_pad, df, end_pad) %>%
-          replace_na(list(sentence_id = 0, token_id = 0, pos = '', entity = '')) %>%
+          replace_na(list(sentence_id = 0, token_id = 0, pos = '', 
+                          entity_type = '', dir = '')) %>%
           mutate(lemma = token)
   return(out)
 }
 ```
 
 ```{r}
+types_to_consolidate <- c("EVENT", "FAC", "GPE", "LANGUAGE", "LAW", "LOC", "NORP",
+                          "ORG", "PERSON", "PRODUCT", "WORK_OF_ART")
+```
+
+```{r}
 comment_parse %>%
+  mutate(token = case_when(entity != '' & token == "Ave" ~ "Avenue",
+                           entity != '' & token == "Pkwy" ~ "Parkway",
+                           entity != '' & token == "Rd" ~ "Road",
+                           entity != '' & token == "rd" ~ "Road",
+                           entity != '' & token == "St." ~ "Street" ,
+                           TRUE ~ token)) %>%
+  entity_consolidate(concatenator = " ") %>%
+  mutate(token = case_when(entity_type != '' & 
+                             str_detect(token, 
+                                        "^[Ll][Ee][Xx]\\W*[Tt][Rr][Aa][Nn]$") ~ "Lextran",
+                           entity_type %in% types_to_consolidate &
+                             !str_detect(token, "^[:upper:]+$") ~ str_to_title(token),
+                           pos == "PRON" & str_detect(token, "^[Ii]$") ~ "I",
+                           TRUE ~ tolower(token)))->consolidated
+```
+
+```{r}
+# consolidated %>%
+#   filter(str_detect(token, "'\\w+?")) %>%
+#   count(token) %>%
+#   arrange(desc(n)) %>%
+#   slice(1:7) %>%
+#   select(-n) %>%
+#   write_csv(file = "../data/00_leaners.csv")
+```
+
+```{r}
+# consolidated %>%
+#   filter(pos == "PUNCT") %>%
+#   count(token) %>%
+#   arrange(desc(n)) %>%
+#   select(-n) %>%
+#   write_csv("../data/01_leaners.csv")
+```
+
+```{r}
+# consolidated %>%
+#   filter(str_detect(token, "’\\w+?")) %>%
+#   count(token) %>%
+#   arrange(desc(n)) %>%
+#   select(-n) %>%
+#   mutate(dir = "<") %>%
+#   slice(1:7) %>%
+#   write_csv(file = "../data/02_leaners.csv")
+```
+
+```{r}
+lean_df <- map_dfr(list.files(path = "../data/", pattern = "*_leaners.csv", full.names = T), read_csv)
+```
+
+```{r}
+consolidated %>%
+  mutate(id = 1:n())%>%
+  left_join(lean_df) %>%
+  replace_na(list(dir = "")) %>%
+  mutate(token = str_replace_all(token, "[’‘]", "'"),
+         token = str_replace_all(token, "[“”]", '"')) %>%
+  arrange(id) %>%
   group_by(doc_id) %>%
   nest() %>%
   mutate(padded = map(data, pad_df)) -> pad_nest
@@ -133,11 +189,10 @@ comment_parse %>%
 pad_nest %>%
   select(-data) %>%
   unnest(padded) %>%
-  select(doc_id, token, pos, entity) %>%
-  mutate(word_i = lag(tolower(token), 2),
-         word_j = lag(tolower(token), 1),
-         word_k = tolower(token)) %>%
-  drop_na() -> trigrams
+  select(doc_id, token, pos, entity_type, dir) %>%
+  mutate(word_i = lag(token, 2),
+         word_j = lag(token, 1),
+         word_k = token)  -> trigrams
 ```
 
 ```{r}
@@ -150,35 +205,23 @@ trigrams %>%
 ```{r}
 trigrams %>%
  ungroup() %>%
- count(word_i, word_j, word_k) %>%
+ count(word_i, word_j, word_k, dir) %>%
  rename(trigram_count = n) -> trigram_count
-```
-
-```{r}
-trigrams %>%
-  ungroup() %>%
-  count(word_k, pos, entity) %>%
-  group_by(word_k) %>%
-  arrange(desc(n)) %>%
-  slice(1) %>%
-  select(-n)-> pos_ent
 ```
 
 ```{r}
 trigram_count %>%
   left_join(bigram_count) %>%
-  left_join(pos_ent) %>%
   mutate(cond_prob = trigram_count/bigram_count)->model
 ```
 
 ```{r}
 model %>%
-  filter(word_i == "green", word_j == "spaces") %>%
-  slice_sample(n = 1, weight_by = cond_prob)
+  filter(word_i == "watersheds", word_j == ".")
 ```
 
 ```{r}
-generate <- function(df, w_i = "<s>", w_j = "<s>", max = 100){
+generate <- function(df, w_i = "<s>", w_j = "<s>", max = 10000){
   out <- vector()
   x = 0
   stop = FALSE
@@ -192,22 +235,35 @@ generate <- function(df, w_i = "<s>", w_j = "<s>", max = 100){
     }
     if(length(out) == 0){
       paste_word = str_to_title(sample$word_k)
-    } else if(sample$entity != ''){
-      paste_word = str_to_title(sample$word_k)
     }else if (w_j == "."){
       paste_word = str_to_title(sample$word_k)
     }else{
       paste_word = sample$word_k
     }
-    out <- c(out, paste_word)
+    left_side <- NULL
+    if(length(out) > 0){
+      if(rev(out)[1] == ""){
+        left_side <- NULL
+      }else if(str_detect(sample$dir, "<")){
+        left_side <- NULL
+      }else{
+        left_side <- " "
+      }
+    }
+    if(str_detect(sample$dir, ">")){
+      right_side <- ""
+    }else{
+      right_side <- NULL
+    }
+    out <- c(out, left_side, paste_word, right_side)
     w_i = w_j
     w_j = sample$word_k
     x = x+1
   }
-  return(out)
+  return(str_c(out, collapse = ""))
 }
 ```
 
 ```{r}
-str_c(generate(model), collapse = " ")
+generate(model)
 ```

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Josef Fruehwald">
-<meta name="dcterms.date" content="2022-10-22">
+<meta name="dcterms.date" content="2022-10-23">
 
 <title>3gram Model</title>
 <style>
@@ -2626,7 +2626,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 22, 2022</p>
+      <p class="date">October 23, 2022</p>
     </div>
   </div>
   
@@ -2643,22 +2643,10 @@ vertical-align: -.125em;
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ensure renv is activated</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># source(&quot;.Rprofile)</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;dplyr&quot;</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;readr&quot;</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;stringr&quot;</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;purrr&quot;</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;tidyr&quot;</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;tidytext&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">refresh</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;spacyr&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Installing spacyr [1.2.1] ...
-    OK [linked cache]</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>
 Attaching package: &#39;dplyr&#39;</code></pre>
@@ -2673,14 +2661,15 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 
     intersect, setdiff, setequal, union</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidytext)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidytext)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(hunspell)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(spacyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(spacyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>You have to sidestep spacyr’s defaults for python versions</p>
 <div class="cell">
@@ -2688,19 +2677,22 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">--yes</span> <span class="at">--name</span> spacy_condaenv python=3.8 spacy <span class="at">-c</span> conda-forge</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">--yes</span> <span class="at">--name</span> spacy_condaenv python=3.8 spacy <span class="at">-c</span> conda-forge</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># only if you need to unstall rust</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#curl --proto &#39;=https&#39; --tlsv1.2 -sSf https://sh.rustup.rs | sh</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">spacy_install</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#spacy_install(lang_models = &quot;en_core_web_trf&quot;)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">spacy_initialize</span>(<span class="at">model =</span> <span class="st">&quot;en_core_web_sm&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">spacy_initialize</span>(<span class="at">model =</span> <span class="st">&quot;en_core_web_trf&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Found &#39;spacy_condaenv&#39;. spacyr will use this environment</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>successfully initialized (spaCy Version: 3.3.1, language model: en_core_web_sm)</code></pre>
+<pre><code>successfully initialized (spaCy Version: 3.3.1, language model: en_core_web_trf)</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>(python options: type = &quot;condaenv&quot;, value = &quot;spacy_condaenv&quot;)</code></pre>
@@ -2710,8 +2702,8 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <section id="load-raw-data" class="level2">
 <h2 class="anchored" data-anchor-id="load-raw-data">Load Raw Data</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;../data/Codes Summed-Main View.csv&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rename_with</span>(<span class="sc">~</span><span class="fu">tolower</span>(<span class="fu">gsub</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">s&quot;</span>, <span class="st">&quot;_&quot;</span>, .x)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;../data/Codes Summed-Main View.csv&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rename_with</span>(<span class="sc">~</span><span class="fu">tolower</span>(<span class="fu">gsub</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">s&quot;</span>, <span class="st">&quot;_&quot;</span>, .x)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Rows: 1672 Columns: 13
 ── Column specification ────────────────────────────────────────────────────────
@@ -2725,9 +2717,13 @@ dbl  (2): Response, ID Number
 </div>
 <p>Checking to ensure there is a unique value of <code>Response</code> for every row.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(dat) <span class="sc">==</span> <span class="fu">length</span>(<span class="fu">unique</span>(dat<span class="sc">$</span>response))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(dat) <span class="sc">==</span> <span class="fu">length</span>(<span class="fu">unique</span>(dat<span class="sc">$</span>response))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1672</code></pre>
 </div>
 </div>
 <p>Focusing in on the qualitative comments.</p>
@@ -2753,131 +2749,195 @@ dbl  (2): Response, ID Number
 <span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>comment_parse <span class="ot">&lt;-</span> <span class="fu">spacy_parse</span>(corpus<span class="sc">$</span>qualitative_response)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">TOKENIZERS_PARALLELISM=</span><span class="st">&quot;false&quot;</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>comment_parse <span class="ot">&lt;-</span> <span class="fu">spacy_parse</span>(corpus<span class="sc">$</span>qualitative_response)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>comment_parse <span class="sc">%&gt;%</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(doc_id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 49,337 × 7
-# Groups:   doc_id [1,672]
-   doc_id sentence_id token_id token       lemma       pos   entity
-   &lt;chr&gt;        &lt;int&gt;    &lt;int&gt; &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt; 
- 1 text1            1        1 Maintenance maintenance NOUN  &quot;&quot;    
- 2 text1            1        2 of          of          ADP   &quot;&quot;    
- 3 text1            1        3 tree        tree        NOUN  &quot;&quot;    
- 4 text1            1        4 canopy      canopy      PROPN &quot;&quot;    
- 5 text1            1        5 ,           ,           PUNCT &quot;&quot;    
- 6 text1            1        6 improved    improved    ADJ   &quot;&quot;    
- 7 text1            1        7 bus         bus         NOUN  &quot;&quot;    
- 8 text1            1        8 or          or          CCONJ &quot;&quot;    
- 9 text1            1        9 trolley     trolley     NOUN  &quot;&quot;    
-10 text1            1       10 service     service     NOUN  &quot;&quot;    
-# … with 49,327 more rows</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>pad_df <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">n =</span> <span class="dv">2</span>, <span class="at">start_symbol =</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, <span class="at">end_symbol =</span> <span class="st">&quot;&lt;/s&gt;&quot;</span>){</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  start_pad <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">token =</span> <span class="fu">rep</span>(start_symbol, <span class="at">times =</span> n))</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  end_pad <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">token =</span> <span class="fu">rep</span>(end_symbol, <span class="at">times =</span> n))</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(start_pad, df, end_pad) <span class="sc">%&gt;%</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>          <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">sentence_id =</span> <span class="dv">0</span>, <span class="at">token_id =</span> <span class="dv">0</span>, <span class="at">pos =</span> <span class="st">&#39;&#39;</span>, </span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">entity_type =</span> <span class="st">&#39;&#39;</span>, <span class="at">dir =</span> <span class="st">&#39;&#39;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>          <span class="fu">mutate</span>(<span class="at">lemma =</span> token)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(out)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>pad_df <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">n =</span> <span class="dv">2</span>, <span class="at">start_symbol =</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, <span class="at">end_symbol =</span> <span class="st">&quot;&lt;/s&gt;&quot;</span>){</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  start_pad <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">token =</span> <span class="fu">rep</span>(start_symbol, <span class="at">times =</span> n))</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  end_pad <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">token =</span> <span class="fu">rep</span>(end_symbol, <span class="at">times =</span> n))</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(start_pad, df, end_pad) <span class="sc">%&gt;%</span></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>          <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">sentence_id =</span> <span class="dv">0</span>, <span class="at">token_id =</span> <span class="dv">0</span>, <span class="at">pos =</span> <span class="st">&#39;&#39;</span>, <span class="at">entity =</span> <span class="st">&#39;&#39;</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>          <span class="fu">mutate</span>(<span class="at">lemma =</span> token)</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(out)</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>types_to_consolidate <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;EVENT&quot;</span>, <span class="st">&quot;FAC&quot;</span>, <span class="st">&quot;GPE&quot;</span>, <span class="st">&quot;LANGUAGE&quot;</span>, <span class="st">&quot;LAW&quot;</span>, <span class="st">&quot;LOC&quot;</span>, <span class="st">&quot;NORP&quot;</span>,</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;ORG&quot;</span>, <span class="st">&quot;PERSON&quot;</span>, <span class="st">&quot;PRODUCT&quot;</span>, <span class="st">&quot;WORK_OF_ART&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>comment_parse <span class="sc">%&gt;%</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(doc_id) <span class="sc">%&gt;%</span></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">padded =</span> <span class="fu">map</span>(data, pad_df)) <span class="ot">-&gt;</span> pad_nest</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>comment_parse <span class="sc">%&gt;%</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">token =</span> <span class="fu">case_when</span>(entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;Ave&quot;</span> <span class="sc">~</span> <span class="st">&quot;Avenue&quot;</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>                           entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;Pkwy&quot;</span> <span class="sc">~</span> <span class="st">&quot;Parkway&quot;</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>                           entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;Rd&quot;</span> <span class="sc">~</span> <span class="st">&quot;Road&quot;</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>                           entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;rd&quot;</span> <span class="sc">~</span> <span class="st">&quot;Road&quot;</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>                           entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;St.&quot;</span> <span class="sc">~</span> <span class="st">&quot;Street&quot;</span> ,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>                           <span class="cn">TRUE</span> <span class="sc">~</span> token)) <span class="sc">%&gt;%</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">entity_consolidate</span>(<span class="at">concatenator =</span> <span class="st">&quot; &quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">token =</span> <span class="fu">case_when</span>(entity_type <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">str_detect</span>(token, </span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">&quot;^[Ll][Ee][Xx]</span><span class="sc">\\</span><span class="st">W*[Tt][Rr][Aa][Nn]$&quot;</span>) <span class="sc">~</span> <span class="st">&quot;Lextran&quot;</span>,</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>                           entity_type <span class="sc">%in%</span> types_to_consolidate <span class="sc">&amp;</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>                             <span class="sc">!</span><span class="fu">str_detect</span>(token, <span class="st">&quot;^[:upper:]+$&quot;</span>) <span class="sc">~</span> <span class="fu">str_to_title</span>(token),</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>                           pos <span class="sc">==</span> <span class="st">&quot;PRON&quot;</span> <span class="sc">&amp;</span> <span class="fu">str_detect</span>(token, <span class="st">&quot;^[Ii]$&quot;</span>) <span class="sc">~</span> <span class="st">&quot;I&quot;</span>,</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>                           <span class="cn">TRUE</span> <span class="sc">~</span> <span class="fu">tolower</span>(token)))<span class="ot">-&gt;</span>consolidated</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>pad_nest <span class="sc">%&gt;%</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>data) <span class="sc">%&gt;%</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(padded) <span class="sc">%&gt;%</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(doc_id, token, pos, entity) <span class="sc">%&gt;%</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">word_i =</span> <span class="fu">lag</span>(<span class="fu">tolower</span>(token), <span class="dv">2</span>),</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">word_j =</span> <span class="fu">lag</span>(<span class="fu">tolower</span>(token), <span class="dv">1</span>),</span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">word_k =</span> <span class="fu">tolower</span>(token)) <span class="sc">%&gt;%</span></span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>() <span class="ot">-&gt;</span> trigrams</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># consolidated %&gt;%</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(str_detect(token, &quot;&#39;\\w+?&quot;)) %&gt;%</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   count(token) %&gt;%</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(desc(n)) %&gt;%</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   slice(1:7) %&gt;%</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(-n) %&gt;%</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   write_csv(file = &quot;../data/00_leaners.csv&quot;)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>trigrams <span class="sc">%&gt;%</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(word_i, word_j) <span class="sc">%&gt;%</span></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">bigram_count =</span> n)<span class="ot">-&gt;</span> bigram_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># consolidated %&gt;%</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(pos == &quot;PUNCT&quot;) %&gt;%</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   count(token) %&gt;%</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(desc(n)) %&gt;%</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(-n) %&gt;%</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   write_csv(&quot;../data/01_leaners.csv&quot;)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>trigrams <span class="sc">%&gt;%</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">count</span>(word_i, word_j, word_k) <span class="sc">%&gt;%</span></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a> <span class="fu">rename</span>(<span class="at">trigram_count =</span> n) <span class="ot">-&gt;</span> trigram_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># consolidated %&gt;%</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(str_detect(token, &quot;’\\w+?&quot;)) %&gt;%</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   count(token) %&gt;%</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(desc(n)) %&gt;%</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(-n) %&gt;%</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(dir = &quot;&lt;&quot;) %&gt;%</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   slice(1:7) %&gt;%</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   write_csv(file = &quot;../data/02_leaners.csv&quot;)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>trigrams <span class="sc">%&gt;%</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(word_k, pos, entity) <span class="sc">%&gt;%</span></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_k) <span class="sc">%&gt;%</span></span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">%&gt;%</span></span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>n)<span class="ot">-&gt;</span> pos_ent</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>trigram_count <span class="sc">%&gt;%</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(bigram_count) <span class="sc">%&gt;%</span></span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(pos_ent) <span class="sc">%&gt;%</span></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cond_prob =</span> trigram_count<span class="sc">/</span>bigram_count)<span class="ot">-&gt;</span>model</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>lean_df <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="fu">list.files</span>(<span class="at">path =</span> <span class="st">&quot;../data/&quot;</span>, <span class="at">pattern =</span> <span class="st">&quot;*_leaners.csv&quot;</span>, <span class="at">full.names =</span> T), read_csv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Joining, by = c(&quot;word_i&quot;, &quot;word_j&quot;)
-Joining, by = &quot;word_k&quot;</code></pre>
+<pre><code>Rows: 8 Columns: 2
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: &quot;,&quot;
+chr (2): token, dir
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 25 Columns: 2
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: &quot;,&quot;
+chr (2): token, dir
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 7 Columns: 2
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: &quot;,&quot;
+chr (2): token, dir
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>model <span class="sc">%&gt;%</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(word_i <span class="sc">==</span> <span class="st">&quot;green&quot;</span>, word_j <span class="sc">==</span> <span class="st">&quot;spaces&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">weight_by =</span> cond_prob)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>consolidated <span class="sc">%&gt;%</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">id =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">n</span>())<span class="sc">%&gt;%</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(lean_df) <span class="sc">%&gt;%</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">dir =</span> <span class="st">&quot;&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">token =</span> <span class="fu">str_replace_all</span>(token, <span class="st">&quot;[’‘]&quot;</span>, <span class="st">&quot;&#39;&quot;</span>),</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">token =</span> <span class="fu">str_replace_all</span>(token, <span class="st">&quot;[“”]&quot;</span>, <span class="st">&#39;&quot;&#39;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(id) <span class="sc">%&gt;%</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(doc_id) <span class="sc">%&gt;%</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">padded =</span> <span class="fu">map</span>(data, pad_df)) <span class="ot">-&gt;</span> pad_nest</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining, by = &quot;token&quot;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>pad_nest <span class="sc">%&gt;%</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>data) <span class="sc">%&gt;%</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(padded) <span class="sc">%&gt;%</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(doc_id, token, pos, entity_type, dir) <span class="sc">%&gt;%</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">word_i =</span> <span class="fu">lag</span>(token, <span class="dv">2</span>),</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">word_j =</span> <span class="fu">lag</span>(token, <span class="dv">1</span>),</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">word_k =</span> token)  <span class="ot">-&gt;</span> trigrams</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>trigrams <span class="sc">%&gt;%</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(word_i, word_j) <span class="sc">%&gt;%</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">bigram_count =</span> n)<span class="ot">-&gt;</span> bigram_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>trigrams <span class="sc">%&gt;%</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">count</span>(word_i, word_j, word_k, dir) <span class="sc">%&gt;%</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a> <span class="fu">rename</span>(<span class="at">trigram_count =</span> n) <span class="ot">-&gt;</span> trigram_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>trigram_count <span class="sc">%&gt;%</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(bigram_count) <span class="sc">%&gt;%</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cond_prob =</span> trigram_count<span class="sc">/</span>bigram_count)<span class="ot">-&gt;</span>model</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining, by = c(&quot;word_i&quot;, &quot;word_j&quot;)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>model <span class="sc">%&gt;%</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(word_i <span class="sc">==</span> <span class="st">&quot;watersheds&quot;</span>, word_j <span class="sc">==</span> <span class="st">&quot;.&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 8
-  word_i word_j word_k trigram_count bigram_count pos   entity cond_prob
-  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;        &lt;int&gt; &lt;chr&gt; &lt;chr&gt;      &lt;dbl&gt;
-1 green  spaces and                5           26 CCONJ &quot;&quot;         0.192</code></pre>
+<pre><code># A tibble: 1 × 7
+  word_i     word_j word_k dir   trigram_count bigram_count cond_prob
+  &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;         &lt;int&gt;        &lt;int&gt;     &lt;dbl&gt;
+1 watersheds .      &lt;/s&gt;   &quot;&quot;                1            1         1</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>generate <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">w_i =</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, <span class="at">w_j =</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, <span class="at">max =</span> <span class="dv">100</span>){</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">vector</span>()</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">=</span> <span class="dv">0</span></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  stop <span class="ot">=</span> <span class="cn">FALSE</span></span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(x <span class="sc">&lt;</span> max <span class="sc">&amp;</span> <span class="sc">!</span>stop){</span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    sample <span class="ot">=</span> df <span class="sc">%&gt;%</span> </span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>                <span class="fu">filter</span>(word_i <span class="sc">==</span> w_i, word_j <span class="sc">==</span> w_j) <span class="sc">%&gt;%</span> </span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>                <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">weight_by =</span> cond_prob)</span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(sample<span class="sc">$</span>word_k <span class="sc">==</span> <span class="st">&quot;&lt;/s&gt;&quot;</span>) {</span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>      stop <span class="ot">=</span> <span class="cn">TRUE</span></span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">break</span></span>
-<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(out) <span class="sc">==</span> <span class="dv">0</span>){</span>
-<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> <span class="fu">str_to_title</span>(sample<span class="sc">$</span>word_k)</span>
-<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span>(sample<span class="sc">$</span>entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span>){</span>
-<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> <span class="fu">str_to_title</span>(sample<span class="sc">$</span>word_k)</span>
-<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span> <span class="cf">if</span> (w_j <span class="sc">==</span> <span class="st">&quot;.&quot;</span>){</span>
-<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> <span class="fu">str_to_title</span>(sample<span class="sc">$</span>word_k)</span>
-<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
-<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> sample<span class="sc">$</span>word_k</span>
-<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>    out <span class="ot">&lt;-</span> <span class="fu">c</span>(out, paste_word)</span>
-<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>    w_i <span class="ot">=</span> w_j</span>
-<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>    w_j <span class="ot">=</span> sample<span class="sc">$</span>word_k</span>
-<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">=</span> x<span class="sc">+</span><span class="dv">1</span></span>
-<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(out)</span>
-<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>generate <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">w_i =</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, <span class="at">w_j =</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, <span class="at">max =</span> <span class="dv">10000</span>){</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">vector</span>()</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  stop <span class="ot">=</span> <span class="cn">FALSE</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(x <span class="sc">&lt;</span> max <span class="sc">&amp;</span> <span class="sc">!</span>stop){</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    sample <span class="ot">=</span> df <span class="sc">%&gt;%</span> </span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>                <span class="fu">filter</span>(word_i <span class="sc">==</span> w_i, word_j <span class="sc">==</span> w_j) <span class="sc">%&gt;%</span> </span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>                <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">weight_by =</span> cond_prob)</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(sample<span class="sc">$</span>word_k <span class="sc">==</span> <span class="st">&quot;&lt;/s&gt;&quot;</span>) {</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>      stop <span class="ot">=</span> <span class="cn">TRUE</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">break</span></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(out) <span class="sc">==</span> <span class="dv">0</span>){</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> <span class="fu">str_to_title</span>(sample<span class="sc">$</span>word_k)</span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span> <span class="cf">if</span> (w_j <span class="sc">==</span> <span class="st">&quot;.&quot;</span>){</span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> <span class="fu">str_to_title</span>(sample<span class="sc">$</span>word_k)</span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> sample<span class="sc">$</span>word_k</span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>    left_side <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(out) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(<span class="fu">rev</span>(out)[<span class="dv">1</span>] <span class="sc">==</span> <span class="st">&quot;&quot;</span>){</span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>        left_side <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>      }<span class="cf">else</span> <span class="cf">if</span>(<span class="fu">str_detect</span>(sample<span class="sc">$</span>dir, <span class="st">&quot;&lt;&quot;</span>)){</span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>        left_side <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>      }<span class="cf">else</span>{</span>
+<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a>        left_side <span class="ot">&lt;-</span> <span class="st">&quot; &quot;</span></span>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">str_detect</span>(sample<span class="sc">$</span>dir, <span class="st">&quot;&gt;&quot;</span>)){</span>
+<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a>      right_side <span class="ot">&lt;-</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
+<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a>      right_side <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb40-34"><a href="#cb40-34" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-35"><a href="#cb40-35" aria-hidden="true" tabindex="-1"></a>    out <span class="ot">&lt;-</span> <span class="fu">c</span>(out, left_side, paste_word, right_side)</span>
+<span id="cb40-36"><a href="#cb40-36" aria-hidden="true" tabindex="-1"></a>    w_i <span class="ot">=</span> w_j</span>
+<span id="cb40-37"><a href="#cb40-37" aria-hidden="true" tabindex="-1"></a>    w_j <span class="ot">=</span> sample<span class="sc">$</span>word_k</span>
+<span id="cb40-38"><a href="#cb40-38" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">=</span> x<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb40-39"><a href="#cb40-39" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb40-40"><a href="#cb40-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">str_c</span>(out, <span class="at">collapse =</span> <span class="st">&quot;&quot;</span>))</span>
+<span id="cb40-41"><a href="#cb40-41" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_c</span>(<span class="fu">generate</span>(model), <span class="at">collapse =</span> <span class="st">&quot; &quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">generate</span>(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] &quot;More amenities are for wealthier , recresruinal users rather than have it fall into the public transport into the rest of the city parks .&quot;</code></pre>
+<pre><code>[1] &quot;Better public transportation 24 hours a day for people on the bus? I think is a must. Yes, we should have some of our neighborhoods. More exposure of existing building stock for urban housing with access to housing as condition for permit just as we have problems with all of those without a college degree.&quot;</code></pre>
 </div>
 </div>
 </section>

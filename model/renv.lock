@@ -15,7 +15,9 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "539dc0c0c05636812f1080f473d2c177",
-      "Requirements": []
+      "Requirements": [
+        "lattice"
+      ]
     },
     "R6": {
       "Package": "R6",
@@ -32,6 +34,16 @@
       "Repository": "CRAN",
       "Hash": "e9c08b94391e9f3f97355841229124f2",
       "Requirements": []
+    },
+    "RcppTOML": {
+      "Package": "RcppTOML",
+      "Version": "0.1.7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "f8a578aa91321ecec1292f1e2ffadeda",
+      "Requirements": [
+        "Rcpp"
+      ]
     },
     "SnowballC": {
       "Package": "SnowballC",
@@ -126,6 +138,14 @@
       "Hash": "e8a1e41acf02548751f45c718d55aa6a",
       "Requirements": []
     },
+    "data.table": {
+      "Package": "data.table",
+      "Version": "1.14.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "b9b912b41064aaa79270f24d123c887d",
+      "Requirements": []
+    },
     "digest": {
       "Package": "digest",
       "Version": "0.6.30",
@@ -211,6 +231,16 @@
       "Hash": "4f2596dfb05dac67b9dc558e5c6fba2e",
       "Requirements": []
     },
+    "here": {
+      "Package": "here",
+      "Version": "1.0.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "24b224366f9c2e7534d2344d10d59211",
+      "Requirements": [
+        "rprojroot"
+      ]
+    },
     "highr": {
       "Package": "highr",
       "Version": "0.9",
@@ -295,8 +325,17 @@
         "evaluate",
         "highr",
         "stringr",
-        "xfun"
+        "xfun",
+        "yaml"
       ]
+    },
+    "lattice": {
+      "Package": "lattice",
+      "Version": "0.20-45",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "b64cdbb2b340437c4ee047a1f4c4377b",
+      "Requirements": []
     },
     "lifecycle": {
       "Package": "lifecycle",
@@ -351,6 +390,14 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "01f28d4278f15c76cddbea05899c5d6f",
+      "Requirements": []
+    },
+    "png": {
+      "Package": "png",
+      "Version": "0.1-7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "03b7076c234cb3331288919983326c55",
       "Requirements": []
     },
     "prettyunits": {
@@ -421,6 +468,23 @@
       "Hash": "c9e8442ab69bc21c9697ecf856c1e6c7",
       "Requirements": []
     },
+    "reticulate": {
+      "Package": "reticulate",
+      "Version": "1.26",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "91c176c84a2e3558572d2cbaddc08bd4",
+      "Requirements": [
+        "Matrix",
+        "Rcpp",
+        "RcppTOML",
+        "here",
+        "jsonlite",
+        "png",
+        "rappdirs",
+        "withr"
+      ]
+    },
     "rlang": {
       "Package": "rlang",
       "Version": "1.0.6",
@@ -444,8 +508,17 @@
         "knitr",
         "stringr",
         "tinytex",
-        "xfun"
+        "xfun",
+        "yaml"
       ]
+    },
+    "rprojroot": {
+      "Package": "rprojroot",
+      "Version": "2.0.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "1de7ab598047a87bba48434ba35d497d",
+      "Requirements": []
     },
     "sass": {
       "Package": "sass",
@@ -459,6 +532,17 @@
         "htmltools",
         "rappdirs",
         "rlang"
+      ]
+    },
+    "spacyr": {
+      "Package": "spacyr",
+      "Version": "1.2.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "91d7138ab33fd6425700ec778206050c",
+      "Requirements": [
+        "data.table",
+        "reticulate"
       ]
     },
     "stringi": {
@@ -643,6 +727,14 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "9eba2411b0b1f879797141bd24df7407",
+      "Requirements": []
+    },
+    "yaml": {
+      "Package": "yaml",
+      "Version": "2.3.6",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "9b570515751dcbae610f29885e025b41",
       "Requirements": []
     }
   }
