@@ -1,5 +1,5 @@
 const firebaseConfig = require('./firebaseconfig.json');
-const trigramData = require('../data/data.json');
+const trigramData = require('../data/model.json');
 
 import('firebase/app')
   .then((firebase) => {
