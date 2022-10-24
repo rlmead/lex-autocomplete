@@ -1,0 +1,450 @@
+---
+title: "3gram Model"
+author: "Josef Fruehwald"
+date: today
+editor: visual
+license: MIT
+format:
+  html:
+    embed-resources: true
+    theme: darkly
+code-tools: true
+---
+
+## Setup
+
+I'm going to try to keep the install size small, so rather than installing the whole tidyverse metapackage, I'll just install the specific libraries I use.
+
+Requires `renv` and `reticulate`.
+
+```{r}
+#| label: install
+#| eval: false
+# ensure renv is activated
+# source(".Rprofile)
+renv::refresh()
+```
+
+```{r}
+#| label: main_libraries
+library(dplyr)
+library(readr)
+library(stringr)
+library(purrr)
+library(tidyr)
+library(rjson)
+```
+
+```{r}
+#| label: spacyr
+library(spacyr)
+```
+
+I had to sidestep `spacyr`'s approach to installing and downloading spaCy and its language models, but I found I could sidestep it by directly installing spacy and its language models into the conda environment `spacyr` expects.
+
+```{bash}
+#| eval: false
+#| filename: "spacy_install.sh"
+conda create --yes --name spacy_condaenv python=3.8 spacy -c conda-forge
+conda activate spacy_condaenv
+python -m spacy download en_core_web_trf
+# fallback
+# python -m spacy download en_core_web_sm
+```
+
+```{r}
+#| eval: false
+spacy_install(lang_models = "en_core_web_trf")
+# fallback
+# spacy_install(lang_models = "en_core_web_sm")
+```
+
+```{r}
+#| label: initialize_model
+spacy_initialize(model = "en_core_web_trf")
+# fallback
+# spacy_initialize(model = "en_core_web_sm)
+```
+
+## Load Raw Data
+
+```{r}
+#| label: raw_data_read
+dat <- read_csv("../data/Codes Summed-Main View.csv") %>%
+          rename_with(~tolower(gsub("\\s", "_", .x)))
+```
+
+Checking to ensure there is a unique value of `Response` for every row.
+
+```{r}
+#| label: quality_check
+nrow(dat) == length(unique(dat$response))
+nrow(dat)
+```
+
+Focusing in on the qualitative comments.
+
+```{r}
+#| label: corpus_focus
+dat %>%
+  select(response, qualitative_response) %>%
+  mutate(qualitative_response = str_replace_all(qualitative_response, "\\s+", " "))-> corpus
+```
+
+## Processing
+
+### spaCy Parse
+
+Using spacy's models to tokenize the comments and annotate part of speech and entity tags.
+
+```{r}
+#| label: spacy_parse
+Sys.setenv(TOKENIZERS_PARALLELISM="false")
+comment_parse <- spacy_parse(corpus$qualitative_response)
+```
+
+### Define padding function
+
+`pad_df()` will add sequence start and end padding.
+
+```{r}
+#| label: def_pad_df
+#' Pad comments for ngram
+#' 
+#' Function expects a data frame output from \code{spacy_parse()} that has had its
+#' entities consolidated
+#' 
+#' @param df a df outpuyt from \code{spacy_parse()}
+#' @param n the pad size (should be ngram size minus one)
+#' @start_symbol the start of sequence symbol
+#' @end_symbol the end of sequence symbol
+#' 
+#' @returns The same df, but padded out with \code{start_symbok} and \code{end_symbol}
+pad_df <- function(df, n = 2, start_symbol = "<s>", end_symbol = "</s>"){
+  start_pad <- tibble(token = rep(start_symbol, times = n))
+  end_pad <- tibble(token = rep(end_symbol, times = n))
+  out <- bind_rows(start_pad, df, end_pad) %>%
+          replace_na(list(sentence_id = 0, token_id = 0, pos = '', 
+                          entity_type = '', dir = '')) %>%
+          mutate(lemma = token)
+  return(out)
+}
+```
+
+### Text normalization
+
+Only certain consolidated entities should be title cased.
+
+```{r}
+#| label: def_titlecase
+types_to_titlecase <- c("EVENT", "FAC", "GPE", "LANGUAGE", "LAW", "LOC", "NORP",
+                          "ORG", "PERSON", "PRODUCT", "WORK_OF_ART")
+```
+
+Here we normalize certain street name abbreviations so that they'll be counted up as a single type. Otherwise `"Nicholasville Road"`, `"Nicholasville Rd"`, and `"Nicholasville rd"` would have all gotten different probability distributions.
+
+Additionally, multiple spellings, spacings, and capitalizations of the transit system, Lextran, were normalized to `"Lextran"`. Examples I saw included
+
+-   `lextran`
+
+-   `Lextran`
+
+-   `LEXTRAN`
+
+-   `Lex Tran`
+
+-   `LexTran`
+
+-   `Lex-tran`
+
+```{r}
+#| label: normalize_and_pad
+comment_parse %>%
+  mutate(token = case_when(entity != '' & token == "Ave" ~ "Avenue",
+                           entity != '' & token == "Pkwy" ~ "Parkway",
+                           entity != '' & token == "Rd" ~ "Road",
+                           entity != '' & token == "rd" ~ "Road",
+                           entity != '' & token == "St." ~ "Street" ,
+                           TRUE ~ token)) %>%
+  entity_consolidate(concatenator = " ") %>%
+  mutate(token = case_when(entity_type != '' & 
+                             str_detect(token, 
+                                        "^[Ll][Ee][Xx]\\W*[Tt][Rr][Aa][Nn]$") ~ "Lextran",
+                           entity_type %in% types_to_titlecase &
+                             !str_detect(token, "^[:upper:]+$") ~ str_to_title(token),
+                           pos == "PRON" & str_detect(token, "^[Ii]$") ~ "I",
+                           TRUE ~ tolower(token)))->consolidated
+```
+
+### Coding of "leaners"
+
+Certain tokens are "leaners". Some tokens lean left, and should have no whitespace between them and the previous token with detokenied:
+
+-   `"also"` `","` (leans left) -\> `"also,"`
+
+-   `"I"` `"'m"` (leans left) -\> `"I'm"`
+
+Some tokens lean right, and should have no whitespace with the following token
+
+-   `"("` `"incidentally"` (leans right) -\> `"(incidentally"`
+
+-   `"“"` `"so-called"` (leans right) -\> `"“so-called"`
+
+Some tokens lean left *and* right, and should have no whitespace in either direction when detokenized
+
+-   `"and"` `"/"` `"or"` (leans both ways) -\> `"and/or"`
+
+These were hand coded based on the tokens that appeared in the corpus, so I don't re-reun these blocks afterwards to prevent overwriting the hand coding.
+
+```{r}
+# consolidated %>%
+#   filter(str_detect(token, "'\\w+?")) %>%
+#   count(token) %>%
+#   arrange(desc(n)) %>%
+#   slice(1:7) %>%
+#   select(-n) %>%
+#   write_csv(file = "../data/00_leaners.csv")
+```
+
+```{r}
+# consolidated %>%
+#   filter(pos == "PUNCT") %>%
+#   count(token) %>%
+#   arrange(desc(n)) %>%
+#   select(-n) %>%
+#   write_csv("../data/01_leaners.csv")
+```
+
+```{r}
+# consolidated %>%
+#   filter(str_detect(token, "’\\w+?")) %>%
+#   count(token) %>%
+#   arrange(desc(n)) %>%
+#   select(-n) %>%
+#   mutate(dir = "<") %>%
+#   slice(1:7) %>%
+#   write_csv(file = "../data/02_leaners.csv")
+```
+
+```{r}
+#| lavbel: read_in_lean
+lean_df <- map_dfr(list.files(path = "../data/", pattern = "*_leaners.csv", full.names = T), read_csv)
+```
+
+After joining on the lean coding, normalize smart quotes. This wasn't done prior to lean coding so that I *could* code left and right lean for `“` etc.
+
+```{r}
+#| label: code_lean
+consolidated %>%
+  mutate(id = 1:n())%>%
+  left_join(lean_df) %>%
+  replace_na(list(dir = "")) %>%
+  mutate(token = str_replace_all(token, "[’‘]", "'"),
+         token = str_replace_all(token, "[“”]", '"')) -> lean_coded
+
+```
+
+Now, do actual padding by comment.
+
+```{r}
+#| label: pad
+lean_coded %>%
+  arrange(id) %>%
+  group_by(doc_id) %>%
+  nest() %>%
+  mutate(padded = map(data, pad_df)) -> pad_nest
+```
+
+## Make the Trigram Model
+
+Making the trigrams by lagging `token` 1 and 2 times within comment.
+
+```{r}
+#| label: make_trigrams
+pad_nest %>%
+  select(-data) %>%
+  unnest(padded) %>%
+  select(doc_id, token, pos, entity_type, dir) %>%
+  group_by(doc_id) %>%
+  mutate(word_i = lag(token, 2),
+         word_j = lag(token, 1),
+         word_k = token) %>%
+  drop_na()-> trigrams
+```
+
+In order to generate comments from the bigrams, we'll need to get the conditional probability of `word_k` from the preceding sequence `word_i, word_j`.
+
+$$
+P(w_k | w_i,w_j)
+$$
+
+To get that probability, we'll divide the counts of trigrams by the count of bigrams.
+
+$$
+P(w_k|w_i,w_j) = \frac{C(w_i, w_j, w_k)}{C(w_i, w_j)}
+$$
+
+To do that, I'll create a bigram count data frame, a trigram count dataframe, and join them.
+
+```{r}
+#| label: bigram_count
+trigrams %>%
+  ungroup() %>%
+  count(word_i, word_j) %>%
+  rename(bigram_count = n)-> bigram_count
+```
+
+```{r}
+#| label: trigram_count
+trigrams %>%
+ ungroup() %>%
+ count(word_i, word_j, word_k, dir) %>%
+ rename(trigram_count = n) -> trigram_count
+```
+
+```{r}
+#| label: model
+trigram_count %>%
+  left_join(bigram_count) %>%
+  mutate(cond_prob = trigram_count/bigram_count)->model
+```
+
+## Mockup of Generator
+
+Generating continuer from the data.
+
+```{r}
+#| label: gen_1
+model %>%
+  filter(word_i == "<s>", word_j == "<s>") %>%
+  sample_n(size = 1, weight = cond_prob)
+```
+
+The actual site will generate comments using javascript, but this is a mockup to explore what's necessary.
+
+```{r}
+#| label: generate_fun
+#' generate a sequence from a trigram model df
+#' 
+#' @param df The data frame containing the trigram model
+#' @param w_i The n-2th word
+#' @param w_j The n-1th word
+#' @param max a max length of a comment
+#' 
+#' @returns A concatenated comment string
+generate <- function(df, w_i = "<s>", w_j = "<s>", max = 10000){
+  out <- vector()
+  x = 0
+  stop = FALSE
+  while(x < max & !stop){
+    sample = df %>% 
+                filter(word_i == w_i, word_j == w_j) %>% 
+                slice_sample(n = 1, weight_by = cond_prob)
+    if(sample$word_k == "</s>") {
+      stop = TRUE
+      break
+    }
+    if(length(out) == 0){
+      paste_word = str_to_title(sample$word_k)
+    }else if (w_j %in% c(".", "?", "!")){
+      paste_word = str_to_title(sample$word_k)
+    }else{
+      paste_word = sample$word_k
+    }
+    left_side <- NULL
+    if(length(out) > 0){
+      if(rev(out)[1] == ""){
+        left_side <- NULL
+      }else if(str_detect(sample$dir, "<")){
+        left_side <- NULL
+      }else{
+        left_side <- " "
+      }
+    }
+    if(str_detect(sample$dir, ">")){
+      right_side <- ""
+    }else{
+      right_side <- NULL
+    }
+    out <- c(out, left_side, paste_word, right_side)
+    w_i = w_j
+    w_j = sample$word_k
+    x = x+1
+  }
+  return(str_c(out, collapse = ""))
+}
+```
+
+```{r}
+#| label: sample_gen
+generate(model)
+```
+
+## Prepare model for json
+
+The model needs to be re-represented as a json file to be processed for the site. We decided on the schema
+
+``` {.json filename="model_schema.json"}
+{
+  w_i : {
+    w_j : {
+      "next_word": [string, string, string, ...],
+      "sum_prob": [float, float float, ...],
+      "cond_prob": [float, float, float, ...],
+      "lean": [string, string, string, ...]
+    }
+  }
+}
+```
+
+```{r}
+#| label: pre_probs
+model %>%
+  group_by(word_i, word_j) %>%
+  arrange(cond_prob) %>%
+  mutate(sum_prob = cumsum(cond_prob)) ->model_prep
+```
+
+```{r}
+#| label: empty_list
+outer_list <- list()
+```
+
+```{r}
+#| label: nest_model
+model_prep %>%
+  group_by(word_i, word_j) %>%
+  nest() %>%
+  group_by(word_i) %>%
+  nest() -> all_nest
+```
+
+```{r}
+#| label: nest_to_list
+for(i in seq_along(all_nest$word_i)){
+  w_i <- all_nest$word_i[i]
+  outer_list[[w_i]] <- list()
+  inner_j <- all_nest$data[[i]]
+  for(j in seq_along(inner_j$word_j)){
+    w_j <- inner_j$word_j[j]
+    outer_list[[w_i]][[w_j]] <- list()
+    inner_k <- inner_j$data[[j]]
+    
+    outer_list[[w_i]][[w_j]][["next_word"]] <- inner_k$word_k
+    outer_list[[w_i]][[w_j]][["sum_prob"]] <- inner_k$sum_prob
+    outer_list[[w_i]][[w_j]][["cond_prob"]] <- inner_k$cond_prob
+    outer_list[[w_i]][[w_j]][["lean"]] <- inner_k$dir
+  }
+}
+```
+
+```{r}
+#| label: convert_list_to_json
+jsonData <- toJSON(outer_list, indent = 2)
+```
+
+```{r}
+#| eval: false
+#| label: write_json_file
+write(jsonData, file = "../data/model.json")
+```
