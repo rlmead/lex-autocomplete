@@ -8,6 +8,7 @@ format:
   html:
     embed-resources: true
     theme: darkly
+code-tools: true
 ---
 
 ## Setup
