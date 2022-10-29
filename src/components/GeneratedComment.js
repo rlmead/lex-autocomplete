@@ -4,24 +4,27 @@ class GeneratedComment {
     constructor() {
         this.wI = '<s>';
         this.wJ = '<s>';
+        this.wK = '';
         this.commentArray = ['constructor'];
+        this.model = new Ngram;
     }
 
     titleCase(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    update(wK) {
+    append(wK) {
         if (this.commentArray.length == 0) {
             this.commentArray.push(this.titleCase(wK));
+        } else {
+            this.commentArray.push(wK);
         }
-        return this.commentArray;
     }
 
-    async generate() {
-        const model = new Ngram;
-        await model.getTrigramData(this.wI, this.wJ);
-        this.commentArray.push('generate');
+    generate() {
+        this.model.getNextWord(this.wI, this.wJ, (word) => {
+            this.append(word);
+        });
     }
 
     print() {

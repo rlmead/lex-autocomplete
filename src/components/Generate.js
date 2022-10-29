@@ -1,23 +1,43 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col } from "reactstrap";
-import GeneratedComment from "./GeneratedComment";
+import { Container, Row, Col, Button } from "reactstrap";
+import Ngram from "./Ngram";
+import Spinners from "./Spinners";
 
 function Generate() {
-  const comment = new GeneratedComment;
+  const model = new Ngram;
+  const [output, setOutput] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const [output, setOutput] = useState(comment.print());
-
-  useEffect(() => {
-    comment.generate();
-    setOutput(comment.print());
-  }, [comment])
+  async function generateComment() {
+    setOutput('');
+    setLoading(true);
+    var commentArray = ['<s>', '<s>'];
+    for (let i = 0; i < 20; i++) {
+      let wI = commentArray[commentArray.length - 2];
+      let wJ = commentArray[commentArray.length - 1];
+      await model.getNextWord(wI, wJ, (word) => {
+        if (typeof word == 'string') {
+          commentArray.push(word);
+        } else {
+          let nextWord = word[Math.floor(Math.random()*word.length)];
+          commentArray.push(nextWord);
+        }
+      });
+    }
+    setLoading(false);
+    setOutput(model.print(commentArray.slice(2)));
+  }
 
   return (
     <Container>
       <Row className="mt-4 mb-5">
         <Col md={{ size: 6, offset: 3 }}>
-          <h3>generate</h3>
-          <p> { output } </p>
+          <Button color="warning" className="shadow" onClick={generateComment}>Generate</Button>
+          {
+            loading &&
+            <Spinners />
+          }
+          <p> {output} </p>
         </Col>
       </Row>
     </Container>
