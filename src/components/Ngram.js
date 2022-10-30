@@ -25,16 +25,12 @@ class Ngram {
 
     async getNextWord(wordI, wordJ, func) {
         await this.getTrigramData(wordI, wordJ, (data) => {
-            func(data.next_word);
+            func(data);
         });
     }
 
     titleCase(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    print(arr) {
-        return arr.join(' ');
     }
 
 }
