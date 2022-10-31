@@ -1,9 +1,9 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, onValue, ref, get, child } from "firebase/database";
+import { getDatabase, ref, get, child } from "firebase/database";
 
 class Ngram {
     constructor() {
-        this.firebaseConfig = require('../firebaseconfig.json');
+        this.firebaseConfig = require('../data/firebaseconfig.json');
         this.app = initializeApp(this.firebaseConfig);
         this.db = getDatabase(this.app);
         this.wI = '<s>';

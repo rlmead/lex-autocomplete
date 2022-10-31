@@ -26,6 +26,6 @@ This project has been developed with Firebase hosting for the React App. This we
 
 To run and host your own instance of this app your own n-gram model:
 1. [Set up your own Firebase project](https://cloud.google.com/firestore/docs/client/get-firebase) with hosting and a Realtime Database
-1. Make a file `src/firebaseconfig.json` with your Firebase config variables (see `src/firebaseconfig-example.json` for the formatting and variables you'll need)
+1. Make a file `src/data/firebaseconfig.json` with your Firebase config variables (see `src/data/firebaseconfig-example.json` for the formatting and variables you'll need)
 1. Store your n-gram json data in `data/model.json`
 1. Run `node populate_database.js` to send your n-gram data to your Firebase Realtime Database

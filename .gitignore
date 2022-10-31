@@ -1,6 +1,5 @@
 # Firebase
 .firebase
-firebaseconfig.json
 
 # Python environment
 venv
