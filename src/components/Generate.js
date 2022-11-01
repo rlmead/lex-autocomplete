@@ -16,18 +16,16 @@ function Generate() {
     for (let i = 0; i < 20; i++) {
       let wI = commentArray[commentArray.length - 2];
       let wJ = commentArray[commentArray.length - 1];
-      await model.getNextWord(wI, wJ, (wordData) => {
-        let word = wordData.next_word;
-        let lean = wordData.lean;
-        if (typeof word == 'string') {
-          commentArray.push(word);
-          leanArray.push(lean);
+      await model.getNextWord(wI, wJ, (trigramData) => {
+        let wordData = trigramData.next_word;
+        let leanData = trigramData.lean;
+        if (typeof wordData == 'string') {
+          commentArray.push(wordData);
+          leanArray.push(leanData);
         } else {
-          let idx = Math.floor(Math.random() * word.length);
-          let nextWord = word[idx];
-          let nextLean = lean[idx];
-          commentArray.push(nextWord);
-          leanArray.push(nextLean);
+          let idx = model.getWeightedRandom(trigramData.sum_prob);
+          commentArray.push(wordData[idx]);
+          leanArray.push(leanData[idx]);
         }
       });
     }

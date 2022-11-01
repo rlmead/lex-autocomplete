@@ -12,6 +12,11 @@ class Ngram {
     this.wK = '';
   }
 
+  getWeightedRandom(probArray) {
+    let randomFloat = Math.random();
+    return probArray.findIndex( (prob) => prob >= randomFloat );
+  }
+
   capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
