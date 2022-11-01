@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, get, child } from "firebase/database";
+import specialCharacters from "../data/special-characters";
 
 class Ngram {
     constructor() {
@@ -9,6 +10,40 @@ class Ngram {
         this.wI = '<s>';
         this.wJ = '<s>';
         this.wK = '';
+    }
+
+    capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    desanitize(word) {
+        word = word.replace(/<dot>|<slash>|<dollar>|<hash>|<lbracket>|<rbracket>/gi, function (matched) {
+            return specialCharacters[matched];
+        });
+        return word;
+    }
+
+    print(wordArr, leanArr) {
+        var outputArray = [];
+        var sentEnder = ["<dot>", "!", "?"];
+        for (let i = 0; i < wordArr.length; i++) {
+            let word = this.desanitize(wordArr[i]);
+            let lean = leanArr[i];
+            if (outputArray.length == 0) {
+                word = this.capitalize(word);
+                outputArray.push(word);
+            } else {
+                if (sentEnder.includes(wordArr[i - 1])) {
+                    word = this.capitalize(word);
+                }
+                if (lean == '<' || lean == '>' | leanArr[i - 1] == '>' || leanArr == '<>') {
+                    outputArray.push(word);
+                } else {
+                    outputArray.push(" ", word);
+                }
+            }
+        }
+        return outputArray.join('');
     }
 
     async getTrigramData(wordI, wordJ, func) {
@@ -29,9 +64,6 @@ class Ngram {
         });
     }
 
-    titleCase(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
 
 }
 

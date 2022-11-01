@@ -1,50 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Container, Row, Col, Button } from "reactstrap";
 import Ngram from "./Ngram";
 import Spinners from "./Spinners";
-
-function capitalize(word){
-  return word.charAt(0).toUpperCase() + word.slice(1);
-}
-
-function desanitize(word){
-  var mapObj = {
-    '<dot>': '.',
-    '<slash>': '/',
-    '<dollar>': '$',
-    '<hash>': '#',
-    '<lbracket>': '[',
-    '<rbracket>': ']'
-  };
-  word = word.replace(/<dot>|<slash>|<dollar>|<hash>|<lbracket>|<rbracket>/gi, function(matched){
-    return mapObj[matched];
-  });
-  return word;
-}
-
-function print(wordArr, leanArr){
-  var outputArray = [];
-  var sentEnder = ["<dot>", "!", "?"];
-  for (let i=0; i<wordArr.length; i++){
-    let word = desanitize(wordArr[i]);
-    let lean = leanArr[i];
-    if (outputArray.length == 0){
-      word = capitalize(word);
-      outputArray.push(word);
-    }else {
-      if (sentEnder.includes(wordArr[i-1])){
-        word = capitalize(word);
-      }
-      if (lean == '<' || lean == '>' | leanArr[i-1] == '>' || leanArr == '<>'){
-        outputArray.push(word);
-      }else{
-        outputArray.push(" ", word);
-      }
-    }
-  }
-  return outputArray.join('');
-}
-
 
 function Generate() {
   const model = new Ngram;
@@ -66,7 +23,7 @@ function Generate() {
           commentArray.push(word);
           leanArray.push(lean);
         } else {
-          let idx = Math.floor(Math.random()*word.length);
+          let idx = Math.floor(Math.random() * word.length);
           let nextWord = word[idx];
           let nextLean = lean[idx];
           commentArray.push(nextWord);
@@ -75,7 +32,7 @@ function Generate() {
       });
     }
     setLoading(false);
-    setOutput(print(commentArray.slice(2), leanArray.slice(2)));
+    setOutput(model.print(commentArray.slice(2), leanArray.slice(2)));
   }
 
   return (
