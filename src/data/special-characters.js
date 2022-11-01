@@ -1,10 +1,10 @@
 let specialCharacters = {
-    "<dot>": ".",
-    "<slash>": "/",
-    "<dollar>": "$",
-    "<hash>": "#",
-    "<lbracket>": "[",
-    "<rbracket>": "]"
+  "<dot>": ".",
+  "<slash>": "/",
+  "<dollar>": "$",
+  "<hash>": "#",
+  "<lbracket>": "[",
+  "<rbracket>": "]"
 }
 
 export default specialCharacters;
