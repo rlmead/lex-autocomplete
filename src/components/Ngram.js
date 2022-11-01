@@ -1,15 +1,12 @@
+import specialCharacters from "../data/special-characters";
+import firebaseConfig from "../data/firebaseconfig";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, get, child } from "firebase/database";
-import specialCharacters from "../data/special-characters";
 
 class Ngram {
   constructor() {
-    this.firebaseConfig = require('../data/firebaseconfig.json');
-    this.app = initializeApp(this.firebaseConfig);
+    this.app = initializeApp(firebaseConfig);
     this.db = getDatabase(this.app);
-    this.wI = '<s>';
-    this.wJ = '<s>';
-    this.wK = '';
   }
 
   getWeightedRandom(probArray) {
