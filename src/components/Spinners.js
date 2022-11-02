@@ -3,10 +3,8 @@ import { Spinner } from "reactstrap";
 
 function Spinners() {
   return (
-    <div className="text-left">
-      <Spinner type="grow" size="sm" color="danger" className="m-2" />
-      <Spinner type="grow" size="sm" color="danger" className="m-2" />
-      <Spinner type="grow" size="sm" color="danger" className="m-2" />
+    <div className="d-flex justify-content-center">
+      <Spinner type="border" color="danger" />
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Button } from "reactstrap";
+import { Container, Row, Col, Button, Card, CardTitle, CardBody, CardText } from "reactstrap";
 import Ngram from "./Ngram";
 import Spinners from "./Spinners";
 
@@ -49,13 +49,20 @@ function Generate() {
   return (
     <Container>
       <Row className="mt-4 mb-5">
-        <Col md={{ size: 6, offset: 3 }}>
-          <Button color="warning" className="shadow" onClick={generateComment}>Generate</Button>
-          {
-            loading &&
-            <Spinners />
-          }
-          <p> {output} </p>
+        <Col md={{ size: 2, offset: 1 }}>
+          <div className="d-flex justify-content-center">
+            <Button color="warning" className="shadow m-2" onClick={generateComment}>Generate</Button></div>
+        </Col>
+        <Col md={{ size: 8 }}>
+          <Card className="shadow">
+            <CardBody>
+              {
+                loading &&
+                <Spinners className="" />
+              }
+              <CardText className="lead">{output}</CardText>
+            </CardBody>
+          </Card>
         </Col>
       </Row>
     </Container>
