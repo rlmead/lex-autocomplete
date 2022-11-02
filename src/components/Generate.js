@@ -11,23 +11,36 @@ function Generate() {
   async function generateComment() {
     setOutput('');
     setLoading(true);
-    var commentArray = ['<s>', '<s>'];
-    var leanArray = ['', ''];
-    for (let i = 0; i < 20; i++) {
+    let commentArray = ['<s>', '<s>'];
+    let leanArray = ['', ''];
+    let finished = false;
+    for (let i = 0; i < 100 && !finished; i++) {
       let wI = commentArray[commentArray.length - 2];
       let wJ = commentArray[commentArray.length - 1];
       await model.getNextWord(wI, wJ, (trigramData) => {
         let wordData = trigramData.next_word;
+        let word;
         let leanData = trigramData.lean;
+        let lean;
         if (typeof wordData == 'string') {
-          commentArray.push(wordData);
-          leanArray.push(leanData);
+          word = wordData;
+          lean = leanData;
         } else {
           let idx = model.getWeightedRandom(trigramData.sum_prob);
-          commentArray.push(wordData[idx]);
-          leanArray.push(leanData[idx]);
+          word = wordData[idx];
+          lean = leanData[idx];
+        }
+        if (model.desanitize(word) != '</s>') {
+          commentArray.push(word);
+          leanArray.push(lean);
+        } else {
+          finished = true;
         }
       });
+    }
+    if (!['...', '.', '?', '!', ',', ';', ':', '-'].includes(model.desanitize(commentArray[commentArray.length - 1]))) {
+      commentArray.push('...');
+      leanArray.push('<');
     }
     setLoading(false);
     setOutput(model.print(commentArray.slice(2), leanArray.slice(2)));
