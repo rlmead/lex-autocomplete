@@ -37,10 +37,10 @@ function Generate() {
           finished = true;
         }
       });
-    }
-    if (!['...', '.', '?', '!', ',', ';', ':', '-'].includes(model.desanitize(commentArray[commentArray.length - 1]))) {
-      commentArray.push('...');
-      leanArray.push('<');
+      if (i == 99 && !['...', '.', '?', '!', ',', ';', ':', '-'].includes(model.desanitize(commentArray[commentArray.length - 1]))) {
+        commentArray.push('...');
+        leanArray.push('<');
+      }
     }
     setLoading(false);
     setOutput(model.print(commentArray.slice(2), leanArray.slice(2)));
