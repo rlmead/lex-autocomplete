@@ -1,5 +1,7 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCopy } from '@fortawesome/free-solid-svg-icons'
 import React, { useState } from "react";
-import { Container, Row, Col, Button, Card, CardTitle, CardBody, CardText } from "reactstrap";
+import { Container, Row, Col, Button, Card, CardBody, CardText, Tooltip } from "reactstrap";
 import Ngram from "./Ngram";
 import Spinners from "./Spinners";
 
@@ -7,6 +9,15 @@ function Generate() {
   const model = new Ngram;
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  function toggle() {
+    setTooltipOpen(!tooltipOpen)
+  }
+
+  function copyToClipboard() {
+    navigator.clipboard.writeText(output);
+  }
 
   async function generateComment() {
     setOutput('');
@@ -62,10 +73,20 @@ function Generate() {
           <Card className="shadow">
             <CardBody>
               {
-                loading &&
-                <Spinners className="" />
+                loading ? <Spinners className="" />
+                  : <CardText className="lead">
+                    {output}
+                  </CardText>
               }
-              <CardText className="lead">{output}</CardText>
+              {
+                output &&
+                <div className="d-flex flex-row-reverse">
+                  <FontAwesomeIcon icon={faCopy} style={{ cursor: "pointer" }} onClick={copyToClipboard} id="copyIcon" />
+                  <Tooltip placement="right" isOpen={tooltipOpen} target="copyIcon" toggle={toggle}>
+                    click to copy
+                  </Tooltip>
+                </div>
+              }
             </CardBody>
           </Card>
         </Col>
