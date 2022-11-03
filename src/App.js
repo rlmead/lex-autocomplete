@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { Navbar, Nav, NavItem, NavLink } from "reactstrap";
+import { Collapse, Navbar, NavbarToggler, Nav, NavItem, NavLink } from "reactstrap";
 import Autocomplete from "./components/Autocomplete";
 import Generate from "./components/Generate";
 import About from "./components/About";
 
 function App() {
+  const [isOpen, setIsOpen] = useState(false);
+  const toggle = () => setIsOpen(!isOpen);
+
   const [view, setView] = useState("Generate");
 
   let sections = {
@@ -18,34 +21,41 @@ function App() {
       <Navbar
         expand="md"
         light
-        className="navbar-dark sticky-top text-white bg-primary">
-        <h1>OTT Text Prediction</h1>
+        className="navbar-default navbar-dark sticky-top text-white bg-primary">
+        <h1
+          onClick={() => setView("About")}>
+          Lexington's Words
+        </h1>
+        <NavbarToggler onClick={toggle} className="text-white" />
+        <Collapse
+          isOpen={isOpen}
+          navbar >
+          <Nav
+            style={{ display: "flex", flexFlow: "row nowrap" }}
+            navbar >
+            {
+              Object.keys(sections).map((item, index) => {
+                return (
+                  <NavItem
+                    className="mx-auto"
+                    key={index}
+                    onClick={() => setView(item)} >
+                    <NavLink
+                      className={item !== view ? "text-white" : "text-warning"}>
+                      {item}
+                    </NavLink>
+                  </NavItem>
+                )
+              })
+            }
+          </Nav>
+        </Collapse>
       </Navbar>
-      <Nav
-        justified
-        tabs
-        className="bg-primary" >
-        {
-          Object.keys(sections).map((item, index) => {
-            return (
-              <NavItem
-                className="mx-auto"
-                key={index}
-                onClick={() => setView(item)} >
-                <NavLink
-                  className={item !== view ? "text-white" : "text-info"}>
-                  {item}
-                </NavLink>
-              </NavItem>
-            )
-          })
-        }
-      </Nav>
       {
         sections[view]
       }
     </>
-  )
+  );
 }
 
 export default App;
