@@ -3,6 +3,7 @@ import { Collapse, Navbar, NavbarToggler, Nav, NavItem, NavLink } from "reactstr
 import Autocomplete from "./components/Autocomplete";
 import Generate from "./components/Generate";
 import About from "./components/About";
+import Footer from "./components/Footer";
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,6 +55,7 @@ function App() {
       {
         sections[view]
       }
+      <Footer/>
     </>
   );
 }

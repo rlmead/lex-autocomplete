@@ -59,18 +59,13 @@ function Generate() {
 
   return (
     <Container>
-      <Row className="mt-4">
-        <Col md={{ size: 10, offset: 1 }}>
-          <p>Lexingtonians have a lot of ideas for the future of their city. Click the button below to generate a new comment from combinations of their words!</p>
-        </Col>
-      </Row>
       <Row className="mt-3">
         <Col md={{ size: 2, offset: 1 }}>
           <div className="d-flex justify-content-center">
             <Button color="warning" className="shadow mb-3" onClick={generateComment}>Generate</Button></div>
         </Col>
         <Col md={{ size: 7 }}>
-          <Card className="shadow">
+          <Card className="shadow p-3 mb-5">
             <CardBody>
               {
                 loading ? <Spinners className="" />
