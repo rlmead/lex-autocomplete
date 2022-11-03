@@ -68,7 +68,7 @@ function Generate() {
           <Card className="shadow p-3 mb-5">
             <CardBody>
               {
-                loading ? <Spinners className="" />
+                loading ? <Spinners />
                   : <CardText className="lead">
                     {output}
                   </CardText>
