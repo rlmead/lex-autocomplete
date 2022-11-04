@@ -1,16 +1,137 @@
-import React from "react";
-import { Container, Row, Col } from "reactstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCopy } from '@fortawesome/free-solid-svg-icons'
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Button, Card, CardBody, CardText, Tooltip } from "reactstrap";
+import Ngram from "./Ngram";
+import Spinners from "./Spinners";
 
 function Autocomplete() {
+  const model = new Ngram;
+  const [output, setOutput] = useState('');
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [writing, setWriting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [commentArray, setCommentArray] = useState(['<s>', '<s>']);
+  const [leanArray, setLeanArray] = useState([]);
+  const [wordChoiceArray, setWordChoiceArray] = useState([]);
+  const [leanChoiceArray, setLeanChoiceArray] = useState([]);
+
+  useEffect(() => {
+    if (commentArray[commentArray.length-1] == '<<slash>s>') {
+      setWriting(false);
+    } else if ([commentArray != '<s>', '<s>']) {
+      setOutput(model.print(commentArray.slice(2), leanArray.slice(2)))
+    }
+    if (writing) {
+      let wI = commentArray[commentArray.length - 2];
+      let wJ = commentArray[commentArray.length - 1];
+      model.getNextWord(wI, wJ, (data) => {
+        let wordData = data.next_word;
+        let leanData = data.lean;
+        if (typeof wordData == 'string') {
+          setWordChoiceArray([wordData]);
+          setLeanChoiceArray([leanData]);
+        } else {
+          if (wordData.length <= 3) {
+            setWordChoiceArray(wordData);
+            setLeanChoiceArray(leanData);
+          } else {
+            setWordChoiceArray(wordData.slice(1, 4));
+            setLeanChoiceArray(leanData.slice(1, 4));
+          }
+        }
+      }
+      )
+    }
+    setLoading(false);
+  }, [commentArray, writing])
+
+  useEffect(() => {
+    if (!writing) {
+      setWordChoiceArray([]);
+    }
+  }, [writing])
+
+  function toggle() {
+    setTooltipOpen(!tooltipOpen)
+  }
+
+  function copyToClipboard() {
+    navigator.clipboard.writeText(output);
+  }
+
+  async function startComment() {
+    setWordChoiceArray([]);
+    setCommentArray(['<s>', '<s>']);
+    setOutput('');
+    setWriting(true);
+    await addWord(false);
+  }
+
+  function addWord(event) {
+    setLoading(true);
+    if (event) {
+      let index = event.target.id;
+      setCommentArray(commentArray => [...commentArray, wordChoiceArray[index]]);
+      setLeanArray(leanArray => [...leanArray, leanChoiceArray[index]]);
+    };
+  }
+
   return (
     <Container>
-      <Row className="mt-4 mb-5">
-        <Col md={{ size: 6, offset: 3 }}>
-          <h3>autocomplete</h3>
-          <p>stuff goes here</p>
+
+      <Row className="mt-3">
+        <Col md={{ size: 8, offset: 2 }}>
+          <div className="d-flex justify-content-center">
+            <Button
+              color={writing ? "secondary" : "warning"}
+              className="shadow mb-3"
+              onClick={startComment}>
+              Start {writing ? "over" : "a new comment"}
+            </Button></div>
         </Col>
       </Row>
-    </Container>
+      <Row>
+        <Col md={{ size: 8, offset: 2 }}>
+          <Card className={"shadow p-3" + (writing || " mb-5")}>
+            <CardBody>
+              <CardText className="lead">
+                {output}
+              </CardText>
+              {
+                output &&
+                <div className="d-flex flex-row-reverse">
+                  <FontAwesomeIcon icon={faCopy} style={{ cursor: "pointer" }} onClick={copyToClipboard} id="copyIcon" />
+                  <Tooltip placement="right" isOpen={tooltipOpen} target="copyIcon" toggle={toggle}>
+                    click to copy
+                  </Tooltip>
+                </div>
+              }
+            </CardBody>
+          </Card>
+          {
+            loading
+              ? <div className="mt-4"><Spinners /></div>
+              : <div className="d-flex justify-content-center">
+                {
+                  writing && wordChoiceArray.map((item, index) => {
+                    return (
+                      <Button
+                        key={index}
+                        color="warning"
+                        className="shadow m-3"
+                        id={index}
+                        onClick={addWord}>
+                        {item == '<<slash>s>' ? '<End comment>' : item}
+                      </Button>
+                    )
+                  })
+                }
+              </div>
+          }
+        </Col>
+      </Row>
+    </Container >
   )
 }
 
