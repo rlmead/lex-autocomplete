@@ -9,9 +9,32 @@ class Ngram {
     this.db = getDatabase(this.app);
   }
 
+  cumulativeSum(arr) {
+    let output = arr.length > 0 ? [arr[0]] : [];
+    for (let i = 1; i < arr.length; i++) {
+      output.push(arr[i] + output[i-1]);
+    }
+    return output;
+  }
+
   getWeightedRandom(probArray) {
     let randomFloat = Math.random();
     return probArray.findIndex( (prob) => prob >= randomFloat );
+  }
+
+  getWeightedRandoms(sumProb, condProb, num) {
+    let allIndices = [...Array(sumProb.length).keys()];
+    let chosenIndices = [];
+    while (chosenIndices.length < num && allIndices.length > 0) {
+      let index = this.getWeightedRandom(sumProb);
+      chosenIndices.push(allIndices[index]);
+      allIndices.splice(index, 1);
+      condProb.splice(index, 1);
+      sumProb = this.cumulativeSum(condProb);
+      const newSum = condProb.reduce((partialSum, a) => partialSum + a, 0);
+      sumProb = sumProb.map(p => p/newSum);
+    }
+    return chosenIndices;
   }
 
   capitalize(str) {

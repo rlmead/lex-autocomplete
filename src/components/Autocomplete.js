@@ -12,12 +12,12 @@ function Autocomplete() {
   const [writing, setWriting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [commentArray, setCommentArray] = useState(['<s>', '<s>']);
-  const [leanArray, setLeanArray] = useState([]);
+  const [leanArray, setLeanArray] = useState(['','']);
   const [wordChoiceArray, setWordChoiceArray] = useState([]);
   const [leanChoiceArray, setLeanChoiceArray] = useState([]);
 
   useEffect(() => {
-    if (commentArray[commentArray.length-1] == '<<slash>s>') {
+    if (commentArray[commentArray.length - 1] == '<<slash>s>') {
       setWriting(false);
     } else if ([commentArray != '<s>', '<s>']) {
       setOutput(model.print(commentArray.slice(2), leanArray.slice(2)))
@@ -28,17 +28,15 @@ function Autocomplete() {
       model.getNextWord(wI, wJ, (data) => {
         let wordData = data.next_word;
         let leanData = data.lean;
+        let sumProb = data.sum_prob;
+        let condProb = data.cond_prob;
         if (typeof wordData == 'string') {
           setWordChoiceArray([wordData]);
           setLeanChoiceArray([leanData]);
         } else {
-          if (wordData.length <= 3) {
-            setWordChoiceArray(wordData);
-            setLeanChoiceArray(leanData);
-          } else {
-            setWordChoiceArray(wordData.slice(1, 4));
-            setLeanChoiceArray(leanData.slice(1, 4));
-          }
+          let indices = model.getWeightedRandoms(sumProb, condProb, 3);
+          setWordChoiceArray(indices.map(i => wordData[i]));
+          setLeanChoiceArray(indices.map(i => leanData[i]));
         }
       }
       )
@@ -122,7 +120,7 @@ function Autocomplete() {
                         className="shadow m-3"
                         id={index}
                         onClick={addWord}>
-                        {item == '<<slash>s>' ? '<End comment>' : item}
+                        {item == '<<slash>s>' ? '<End comment>' : model.desanitize(item)}
                       </Button>
                     )
                   })
