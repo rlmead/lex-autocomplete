@@ -1,14 +1,14 @@
 import React from "react";
 import { Navbar, Nav } from "reactstrap";
 
-function Footer() {
+function Footer(props) {
   return (
     <Navbar
       className="fixed-bottom bg-success text-white">
       <Nav
         className="mx-auto">
         <p className="mb-auto">
-          Exploring Lexingtonians' ideas for their city's future through combinations of their own words
+          {props.text}
         </p>
       </Nav>
     </Navbar>

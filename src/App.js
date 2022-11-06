@@ -17,6 +17,11 @@ function App() {
     "About": <About />
   };
 
+  let footerText = {
+    "Generate": "Generate a full comment based on ideas from residents of Lexington, KY",
+    "Autocomplete": "Choose your own words to create a comment based on ideas from residents of Lexington, KY"
+  };
+
   return (
     <>
       <Navbar
@@ -55,7 +60,10 @@ function App() {
       {
         sections[view]
       }
-      <Footer/>
+      {
+        view == 'About' ||
+        <Footer text={footerText[view]} />
+      }
     </>
   );
 }
