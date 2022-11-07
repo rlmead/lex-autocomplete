@@ -45,6 +45,7 @@ function App() {
                 return (
                   <NavItem
                     className="mx-auto"
+                    style={{ cursor: "pointer" }}
                     key={index}
                     onClick={() => setView(item)} >
                     <NavLink
