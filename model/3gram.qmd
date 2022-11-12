@@ -88,7 +88,8 @@ Focusing in on the qualitative comments.
 #| label: corpus_focus
 dat %>%
   select(response, qualitative_response) %>%
-  mutate(qualitative_response = str_replace_all(qualitative_response, "\\s+", " "))-> corpus
+  mutate(qualitative_response = str_replace_all(qualitative_response, "\\s+", " ")) %>%
+  filter(nchar(str_replace_all(qualitative_response, "\\s+", "")) >0 )-> corpus
 ```
 
 ## Processing
@@ -101,6 +102,14 @@ Using spacy's models to tokenize the comments and annotate part of speech and en
 #| label: spacy_parse
 Sys.setenv(TOKENIZERS_PARALLELISM="false")
 comment_parse <- spacy_parse(corpus$qualitative_response)
+```
+
+```{r}
+comment_parse %>%
+  filter(entity != "", 
+         str_detect(entity, "_I"),
+         str_detect(entity, "EVENT|FAC|GPE|LANGUAGE|LAW|LOC|NORP|ORG|PERSON|PRODUCT|WORK_OF_ART")) %>%
+  count(token) %>% View
 ```
 
 ### Define padding function
@@ -160,11 +169,19 @@ Additionally, multiple spellings, spacings, and capitalizations of the transit s
 ```{r}
 #| label: normalize_and_pad
 comment_parse %>%
-  mutate(token = case_when(entity != '' & token == "Ave" ~ "Avenue",
+  mutate(token = case_when(entity != '' & str_detect(token, "\\b[Aa]ve\\b") ~ "Avenue",
+                           entity != '' & str_detect(token, "\\b[Bb]dwy\\b") ~ "Broadway",
+                           entity != '' & str_detect(token, "\\b[Bb]lvd\\b") ~ "Boulevard",
+                           entity != '' & str_detect(token, "\\b[Cc]o\\b") ~ "County",
+                           entity != '' & str_detect(token, "\\b[Cc]t\\b") ~ "Court",
+                           entity != '' & str_detect(token, "\\b[Ee]\\b") ~ "East",
+                           entity != '' & str_detect(token, "\\b[Kk][Yy]\\b") ~ "Kentucky",
+                           entity != '' & str_detect(token, "\\b[Ll]ex\\b") ~ "Lexington",
+                           entity != '' & str_detect(token, "\\b[Ll]n\\b") ~ "Lane",
+                           entity != '' & str_detect(token, "\\b[Mm]t\\b") ~ "Mount",
                            entity != '' & token == "Pkwy" ~ "Parkway",
-                           entity != '' & token == "Rd" ~ "Road",
-                           entity != '' & token == "rd" ~ "Road",
-                           entity != '' & token == "St." ~ "Street" ,
+                           entity != '' & str_detect(token, "\\b[Rr]d\\b") ~ "Road",
+                           entity != '' & str_detect(token, "\\b[Ss]t\\b") ~ "Street",
                            TRUE ~ token)) %>%
   entity_consolidate(concatenator = " ") %>%
   mutate(token = case_when(entity_type != '' & 
