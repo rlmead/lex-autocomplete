@@ -414,9 +414,40 @@ The model needs to be re-represented as a json file to be processed for the site
 }
 ```
 
+### Text Sanitize
+
+The following are not allowed in firebase keys
+
+      <dot>: .,
+      <slash>: /,
+      <dollar>: $,
+      <hash>: #,
+      <lbracket>: [,
+      <rbracket>: ]
+
+```{r}
+sanitize <- function(x){
+  x %>%
+    str_replace_all("\\.", "<dot>") %>%
+    str_replace_all("/", "<slash>") %>%
+    str_replace_all("\\$", "<dollar>")  %>%
+    str_replace_all("#", "<hash>") %>%
+    str_replace_all("\\[", "<lbracket>") %>%
+    str_replace_all("\\]", "<rbracket>") -> out
+  return(out)
+}
+```
+
+```{r}
+sanitize("</s>")
+```
+
 ```{r}
 #| label: pre_probs
 model %>%
+  mutate(word_i = sanitize(word_i),
+         word_j = sanitize(word_j),
+         word_k = sanitize(word_k)) %>%
   group_by(word_i, word_j) %>%
   arrange(cond_prob) %>%
   mutate(sum_prob = cumsum(cond_prob)) ->model_prep
