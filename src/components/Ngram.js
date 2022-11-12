@@ -1,25 +1,31 @@
 import specialCharacters from "../data/special-characters";
 import firebaseConfig from "../data/firebaseconfig";
-import { initializeApp } from "firebase/app";
 import { getDatabase, ref, get, child } from "firebase/database";
+const { initializeApp } = require("firebase/app");
+const { initializeAppCheck, ReCaptchaV3Provider } = require("firebase/app-check");
 
+const app = initializeApp(firebaseConfig);
+
+const appCheck = initializeAppCheck(app, {
+  provider: new ReCaptchaV3Provider(firebaseConfig.reCaptchaKey),
+  isTokenAutoRefreshEnabled: true
+});
 class Ngram {
   constructor() {
-    this.app = initializeApp(firebaseConfig);
-    this.db = getDatabase(this.app);
+    this.db = getDatabase(app);
   }
 
   cumulativeSum(arr) {
     let output = arr.length > 0 ? [arr[0]] : [];
     for (let i = 1; i < arr.length; i++) {
-      output.push(arr[i] + output[i-1]);
+      output.push(arr[i] + output[i - 1]);
     }
     return output;
   }
 
   getWeightedRandom(probArray) {
     let randomFloat = Math.random();
-    return probArray.findIndex( (prob) => prob >= randomFloat );
+    return probArray.findIndex((prob) => prob >= randomFloat);
   }
 
   getWeightedRandoms(sumProb, condProb, num) {
@@ -32,7 +38,7 @@ class Ngram {
       condProb.splice(index, 1);
       sumProb = this.cumulativeSum(condProb);
       const newSum = condProb.reduce((partialSum, a) => partialSum + a, 0);
-      sumProb = sumProb.map(p => p/newSum);
+      sumProb = sumProb.map(p => p / newSum);
     }
     return chosenIndices;
   }

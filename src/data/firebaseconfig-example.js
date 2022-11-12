@@ -6,7 +6,8 @@ let firebaseConfig = {
   "messagingSenderId": "your-messaging-sender-id",
   "appId": "your-app-id",
   "measurementId": "your-measurement-id",
-  "databaseURL": "https://your-database-url.firebaseio.com/"
+  "databaseURL": "https://your-database-url.firebaseio.com/",
+  "reCaptchaKey": "your-recaptcha-key"
 }
 
 export default firebaseConfig;
