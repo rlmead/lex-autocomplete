@@ -17,6 +17,7 @@ function Autocomplete() {
   const [leanChoiceArray, setLeanChoiceArray] = useState([]);
 
   useEffect(() => {
+    setLoading(false);
     if (commentArray[commentArray.length - 1] == '<<slash>s>') {
       setWriting(false);
     } else if ([commentArray != '<s>', '<s>']) {
@@ -41,7 +42,6 @@ function Autocomplete() {
       }
       )
     }
-    setLoading(false);
   }, [commentArray, writing])
 
   useEffect(() => {
