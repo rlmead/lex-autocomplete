@@ -24,7 +24,9 @@ function Generate() {
   }, [storedOutput])
 
   useEffect(() => {
-    window.localStorage.setItem('generateOutput', JSON.stringify(output));
+    if (output != '') {
+      window.localStorage.setItem('generateOutput', JSON.stringify(output));
+    }
   }, [output])
 
   useEffect(() => {

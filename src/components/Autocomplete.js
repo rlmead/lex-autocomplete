@@ -38,7 +38,8 @@ function Autocomplete() {
     setLoading(false);
     if (commentArray[commentArray.length - 1] == '<<slash>s>') {
       setWriting(false);
-    } else if ([commentArray != '<s>', '<s>']) {
+    }
+    if ([commentArray != '<s>', '<s>']) {
       setOutput(model.print(commentArray.slice(2), leanArray.slice(2)))
     }
     if (writing) {
