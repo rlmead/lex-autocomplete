@@ -10,7 +10,7 @@ function About() {
             What is this?
           </h1>
           <p>
-            Lexingtonians submitted over 10,000 comments about their ideas for Lexington's future as part of <a className="text-success" href="https://www.ottlex.org/" target="_blank">On The Table</a>. We wanted to build a tool that explored the sense of what everyone had to say! So we built a language model that cuts up and remixes all of the comments to generate new text.
+            Lexingtonians submitted over 10,000 comments about their ideas for Lexington's future as part of <a className="text-success" href="https://www.ottlex.org/" target="_blank" rel="noreferrer">On The Table</a>. We wanted to build a tool that explored the sense of what everyone had to say! So we built a language model that cuts up and remixes all of the comments to generate new text.
           </p>
 
           <h2>
@@ -150,13 +150,13 @@ function About() {
           <hr></hr>
           <h2>Technical Details</h2>
           <p>
-            The trigram model was built in R. Qualitative comments were tokenized and named entitites identified via the <a className="text-success" href="https://cran.r-project.org/web/packages/spacyr/" target="_blank">spacyR package</a>, using the <a className="text-success" href="https://spacy.io/models/en#en_core_web_trf" target="_blank">en_core_web_trf model</a>. Some light by-hand text normalization was done to, e.g. expand abbreviations for "St." and "Rd." to "Street" and "Road", as well as trying to normalize all spelling variants of "Lextran". Identified named entities were title cased, the pronoun "I" was upper-cased, and all other tokens lower-cased. A number of punctuation and contraction tokens had their left or right "lean" hand coded for detokenization. The resulting model was written to JSON for processing by the Javascript comment generators.
+            The trigram model was built in R. Qualitative comments were tokenized and named entitites identified via the <a className="text-success" href="https://cran.r-project.org/web/packages/spacyr/" target="_blank" rel="noreferrer">spacyR package</a>, using the <a className="text-success" href="https://spacy.io/models/en#en_core_web_trf" target="_blank" rel="noreferrer">en_core_web_trf model</a>. Some light by-hand text normalization was done to, e.g. expand abbreviations for "St." and "Rd." to "Street" and "Road", as well as trying to normalize all spelling variants of "Lextran". Identified named entities were title cased, the pronoun "I" was upper-cased, and all other tokens lower-cased. A number of punctuation and contraction tokens had their left or right "lean" hand coded for detokenization. The resulting model was written to JSON for processing by the Javascript comment generators.
           </p>
           <p>
             The site is built in React and hosted on Firebase. Actual token selection is done via calls to the Firebase Realtime Database, and detokenization into the final printed comments is implemented in Javascript. 
           </p>
           <p>
-            All of the code for generating the model and building the website can be found <a className="text-success" href="https://github.com/rlmead/ott-prediction" target="_blank">on github</a>.
+            All of the code for generating the model and building the website can be found <a className="text-success" href="https://github.com/rlmead/ott-prediction" target="_blank" rel="noreferrer">on github</a>.
           </p>
         </Col>
       </Row>
