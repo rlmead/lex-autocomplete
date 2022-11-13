@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCopy } from '@fortawesome/free-solid-svg-icons'
+import { faCopy, faCheck } from '@fortawesome/free-solid-svg-icons'
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Card, CardBody, CardText, Tooltip } from "reactstrap";
 import Ngram from "./Ngram";
@@ -11,6 +11,7 @@ function Generate() {
   const [storedOutput, setStoredOutput] = useState('');
   const [loading, setLoading] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const storedComment = JSON.parse(window.localStorage.getItem('generateOutput'));
@@ -27,12 +28,19 @@ function Generate() {
     window.localStorage.setItem('generateOutput',JSON.stringify(output));
   }, [output])
 
+  useEffect(() => {
+    if (copied) {
+      setTimeout(() => { setCopied(false) }, 1500);
+    }
+  }, [copied])
+
   function toggle() {
     setTooltipOpen(!tooltipOpen)
   }
 
   function copyToClipboard() {
     navigator.clipboard.writeText(output);
+    setCopied(true);
   }
 
   async function generateComment() {
@@ -90,8 +98,17 @@ function Generate() {
               {
                 output &&
                 <div className="d-flex flex-row-reverse">
-                  <FontAwesomeIcon icon={faCopy} style={{ cursor: "pointer" }} onClick={copyToClipboard} id="copyIcon" />
-                  <Tooltip placement="right" isOpen={tooltipOpen} target="copyIcon" toggle={toggle}>
+                  <FontAwesomeIcon
+                    icon={copied ? faCheck : faCopy}
+                    className={copied ? "text-success" : "text-primary"}
+                    style={{ cursor: "pointer", outline: "none" }}
+                    onClick={copyToClipboard}
+                    id="copyIcon" />
+                  <Tooltip
+                    placement="right"
+                    isOpen={tooltipOpen}
+                    target="copyIcon"
+                    toggle={toggle}>
                     click to copy
                   </Tooltip>
                 </div>
