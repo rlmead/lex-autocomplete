@@ -69,6 +69,7 @@ function Autocomplete() {
   async function startComment() {
     setWordChoiceArray([]);
     setCommentArray(['<s>', '<s>']);
+    setLeanArray(['', '']);
     setOutput('');
     setWriting(true);
     await addWord(false);
