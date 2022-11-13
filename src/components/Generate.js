@@ -60,11 +60,9 @@ function Generate() {
   return (
     <Container>
       <Row className="mt-3">
-        <Col md={{ size: 2, offset: 1 }}>
+        <Col md={{ size: 8, offset: 2 }}>
           <div className="d-flex justify-content-center">
-            <Button color="warning" className="shadow mb-3" onClick={generateComment}>Generate</Button></div>
-        </Col>
-        <Col md={{ size: 7 }}>
+            <Button color="warning" className="shadow mb-3" onClick={generateComment}>Generate a comment</Button></div>
           <Card className="shadow p-3 mb-5">
             <CardBody>
               {
