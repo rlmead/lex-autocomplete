@@ -59,18 +59,20 @@ class Ngram {
     var sentEnder = ["<dot>", "!", "?"];
     for (let i = 0; i < wordArr.length; i++) {
       let word = this.desanitize(wordArr[i]);
-      let lean = leanArr[i];
-      if (outputArray.length == 0) {
-        word = this.capitalize(word);
-        outputArray.push(word);
-      } else {
-        if (sentEnder.includes(wordArr[i - 1])) {
+      if (word != '</s>') {
+        let lean = leanArr[i];
+        if (outputArray.length == 0) {
           word = this.capitalize(word);
-        }
-        if (lean == '<' || leanArr[i - 1] == '>' || leanArr == '<>') {
           outputArray.push(word);
         } else {
-          outputArray.push(" ", word);
+          if (sentEnder.includes(wordArr[i - 1])) {
+            word = this.capitalize(word);
+          }
+          if (lean == '<' || leanArr[i - 1] == '>' || leanArr == '<>') {
+            outputArray.push(word);
+          } else {
+            outputArray.push(" ", word);
+          }
         }
       }
     }
