@@ -43,7 +43,7 @@ function App() {
         className="navbar-default navbar-dark sticky-top text-white bg-primary">
         <h1
           onClick={() => setView("About")}>
-          Lexington's Words
+          Lex Autocomplete
         </h1>
         <NavbarToggler onClick={toggle} className="text-white" />
         <Collapse

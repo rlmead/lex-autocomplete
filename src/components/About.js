@@ -156,7 +156,7 @@ function About() {
             The site is built in React and hosted on Firebase. Actual token selection is done via calls to the Firebase Realtime Database, and detokenization into the final printed comments is implemented in Javascript. 
           </p>
           <p>
-            All of the code for generating the model and building the website can be found <a className="text-success" href="https://github.com/rlmead/ott-prediction" target="_blank" rel="noreferrer">on github</a>.
+            All of the code for generating the model and building the website can be found <a className="text-success" href="https://github.com/rlmead/lex-autocomplete" target="_blank" rel="noreferrer">on Github</a>.
           </p>
         </Col>
       </Row>
