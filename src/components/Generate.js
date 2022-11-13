@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from '@fortawesome/free-solid-svg-icons'
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Card, CardBody, CardText, Tooltip } from "reactstrap";
 import Ngram from "./Ngram";
 import Spinners from "./Spinners";
@@ -8,8 +8,24 @@ import Spinners from "./Spinners";
 function Generate() {
   const model = new Ngram;
   const [output, setOutput] = useState('');
+  const [storedOutput, setStoredOutput] = useState('');
   const [loading, setLoading] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  useEffect(() => {
+    const storedComment = JSON.parse(window.localStorage.getItem('generateOutput'));
+    if (storedComment) {
+      setStoredOutput(storedComment);
+    }
+  }, [])
+
+  useEffect(() => {
+    setOutput(storedOutput);
+  }, [storedOutput])
+
+  useEffect(() => {
+    window.localStorage.setItem('generateOutput',JSON.stringify(output));
+  }, [output])
 
   function toggle() {
     setTooltipOpen(!tooltipOpen)

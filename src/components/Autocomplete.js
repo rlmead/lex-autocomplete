@@ -18,6 +18,24 @@ function Autocomplete() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    const storedCommentArray = JSON.parse(window.localStorage.getItem('autocompleteCommentArray'));
+    const storedLeanArray = JSON.parse(window.localStorage.getItem('autocompleteLeanArray'));
+    if (storedCommentArray && storedLeanArray) {
+      setCommentArray(storedCommentArray);
+      setLeanArray(storedLeanArray);
+    }
+    setOutput(model.print(commentArray.slice(2), leanArray.slice(2)));
+  }, [])
+
+  useEffect(() => {
+    window.localStorage.setItem('autocompleteCommentArray',JSON.stringify(commentArray));
+  }, [commentArray])
+
+  useEffect(() => {
+    window.localStorage.setItem('autocompleteLeanArray',JSON.stringify(leanArray));
+  }, [leanArray])
+
+  useEffect(() => {
     setLoading(false);
     if (commentArray[commentArray.length - 1] == '<<slash>s>') {
       setWriting(false);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Collapse, Navbar, NavbarToggler, Nav, NavItem, NavLink } from "reactstrap";
 import Autocomplete from "./components/Autocomplete";
 import Generate from "./components/Generate";
@@ -8,8 +8,20 @@ import Footer from "./components/Footer";
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = () => setIsOpen(!isOpen);
-
   const [view, setView] = useState("Generate");
+
+  useEffect(() => {
+    const storedView = JSON.parse(window.localStorage.getItem('appView'));
+    if (storedView) {
+      setView(storedView);
+    }
+  }, [])
+
+  useEffect(() => {
+    window.localStorage.setItem('appView',JSON.stringify(view));
+  }, [view])
+
+
 
   let sections = {
     "Generate": <Generate />,
