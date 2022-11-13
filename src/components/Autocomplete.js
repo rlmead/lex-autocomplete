@@ -1,14 +1,13 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy, faCheck } from "@fortawesome/free-solid-svg-icons";
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button, Card, CardBody, CardText, Tooltip } from "reactstrap";
+import { Container, Row, Col, Button, Card, CardBody, CardText } from "reactstrap";
 import Ngram from "./Ngram";
 import Spinners from "./Spinners";
 
 function Autocomplete() {
   const model = new Ngram;
   const [output, setOutput] = useState('');
-  const [tooltipOpen, setTooltipOpen] = useState(false);
   const [writing, setWriting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [commentArray, setCommentArray] = useState(['<s>', '<s>']);
@@ -28,11 +27,11 @@ function Autocomplete() {
   }, [])
 
   useEffect(() => {
-    window.localStorage.setItem('autocompleteCommentArray',JSON.stringify(commentArray));
+    window.localStorage.setItem('autocompleteCommentArray', JSON.stringify(commentArray));
   }, [commentArray])
 
   useEffect(() => {
-    window.localStorage.setItem('autocompleteLeanArray',JSON.stringify(leanArray));
+    window.localStorage.setItem('autocompleteLeanArray', JSON.stringify(leanArray));
   }, [leanArray])
 
   useEffect(() => {
@@ -74,10 +73,6 @@ function Autocomplete() {
       setTimeout(() => { setCopied(false) }, 1500);
     }
   }, [copied])
-
-  function toggle() {
-    setTooltipOpen(!tooltipOpen)
-  }
 
   function copyToClipboard() {
     navigator.clipboard.writeText(output);
@@ -132,13 +127,6 @@ function Autocomplete() {
                     style={{ cursor: "pointer", outline: "none" }}
                     onClick={copyToClipboard}
                     id="copyIcon" />
-                  <Tooltip
-                    placement="right"
-                    isOpen={tooltipOpen}
-                    target="copyIcon"
-                    toggle={toggle}>
-                    click to copy
-                  </Tooltip>
                 </div>
               }
             </CardBody>

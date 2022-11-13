@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy, faCheck } from '@fortawesome/free-solid-svg-icons'
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button, Card, CardBody, CardText, Tooltip } from "reactstrap";
+import { Container, Row, Col, Button, Card, CardBody, CardText } from "reactstrap";
 import Ngram from "./Ngram";
 import Spinners from "./Spinners";
 
@@ -10,7 +10,6 @@ function Generate() {
   const [output, setOutput] = useState('');
   const [storedOutput, setStoredOutput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [tooltipOpen, setTooltipOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -25,7 +24,7 @@ function Generate() {
   }, [storedOutput])
 
   useEffect(() => {
-    window.localStorage.setItem('generateOutput',JSON.stringify(output));
+    window.localStorage.setItem('generateOutput', JSON.stringify(output));
   }, [output])
 
   useEffect(() => {
@@ -33,10 +32,6 @@ function Generate() {
       setTimeout(() => { setCopied(false) }, 1500);
     }
   }, [copied])
-
-  function toggle() {
-    setTooltipOpen(!tooltipOpen)
-  }
 
   function copyToClipboard() {
     navigator.clipboard.writeText(output);
@@ -104,13 +99,6 @@ function Generate() {
                     style={{ cursor: "pointer", outline: "none" }}
                     onClick={copyToClipboard}
                     id="copyIcon" />
-                  <Tooltip
-                    placement="right"
-                    isOpen={tooltipOpen}
-                    target="copyIcon"
-                    toggle={toggle}>
-                    click to copy
-                  </Tooltip>
                 </div>
               }
             </CardBody>
