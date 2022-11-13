@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCopy } from '@fortawesome/free-solid-svg-icons'
+import { faCopy, faCheck } from "@fortawesome/free-solid-svg-icons";
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Card, CardBody, CardText, Tooltip } from "reactstrap";
 import Ngram from "./Ngram";
@@ -12,9 +12,10 @@ function Autocomplete() {
   const [writing, setWriting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [commentArray, setCommentArray] = useState(['<s>', '<s>']);
-  const [leanArray, setLeanArray] = useState(['','']);
+  const [leanArray, setLeanArray] = useState(['', '']);
   const [wordChoiceArray, setWordChoiceArray] = useState([]);
   const [leanChoiceArray, setLeanChoiceArray] = useState([]);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setLoading(false);
@@ -50,12 +51,19 @@ function Autocomplete() {
     }
   }, [writing])
 
+  useEffect(() => {
+    if (copied) {
+      setTimeout(() => { setCopied(false) }, 1500);
+    }
+  }, [copied])
+
   function toggle() {
     setTooltipOpen(!tooltipOpen)
   }
 
   function copyToClipboard() {
     navigator.clipboard.writeText(output);
+    setCopied(true);
   }
 
   async function startComment() {
@@ -99,8 +107,17 @@ function Autocomplete() {
               {
                 output &&
                 <div className="d-flex flex-row-reverse">
-                  <FontAwesomeIcon icon={faCopy} style={{ cursor: "pointer" }} onClick={copyToClipboard} id="copyIcon" />
-                  <Tooltip placement="right" isOpen={tooltipOpen} target="copyIcon" toggle={toggle}>
+                  <FontAwesomeIcon
+                    icon={copied ? faCheck : faCopy}
+                    className={copied ? "text-success" : "text-secondary"}
+                    style={{ cursor: "pointer", outline: "none" }}
+                    onClick={copyToClipboard}
+                    id="copyIcon" />
+                  <Tooltip
+                    placement="right"
+                    isOpen={tooltipOpen}
+                    target="copyIcon"
+                    toggle={toggle}>
                     click to copy
                   </Tooltip>
                 </div>
