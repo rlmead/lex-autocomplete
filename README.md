@@ -1,4 +1,4 @@
-# OTT Prediction
+# Lex Autocomplete
 
 A text prediction project based on the ideas that residents of Lexington, Kentucky have about their city's future.
 

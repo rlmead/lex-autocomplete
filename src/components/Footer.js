@@ -7,7 +7,7 @@ function Footer(props) {
       className="fixed-bottom bg-success text-white">
       <Nav
         className="mx-auto">
-        <p className="mb-auto">
+        <p className="mb-auto" style={{ fontSize: "1.25em" }}>
           {props.text}
         </p>
       </Nav>
