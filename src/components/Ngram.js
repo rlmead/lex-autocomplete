@@ -67,7 +67,7 @@ class Ngram {
         if (sentEnder.includes(wordArr[i - 1])) {
           word = this.capitalize(word);
         }
-        if (lean == '<' || lean == '>' | leanArr[i - 1] == '>' || leanArr == '<>') {
+        if (lean == '<' || leanArr[i - 1] == '>' || leanArr == '<>') {
           outputArray.push(word);
         } else {
           outputArray.push(" ", word);
