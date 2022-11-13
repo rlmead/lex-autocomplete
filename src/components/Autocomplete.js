@@ -123,7 +123,7 @@ function Autocomplete() {
                 <div className="d-flex flex-row-reverse">
                   <FontAwesomeIcon
                     icon={copied ? faCheck : faCopy}
-                    className={copied ? "text-success" : "text-primary"}
+                    className={copied ? "text-success" : "text-dark"}
                     style={{ cursor: "pointer", outline: "none" }}
                     onClick={copyToClipboard}
                     id="copyIcon" />
