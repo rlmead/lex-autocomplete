@@ -6,9 +6,9 @@ function About() {
     <Container>
       <Row className="mt-4 mb-5">
         <Col md={{ size: 8, offset:2}} style={{fontSize: "1.25em"}}>
-          <h2>
+          <h1>
             What is this?
-          </h2>
+          </h1>
           <p>
             Lexingtonians submitted over 10,000 comments about their ideas for Lexington's future as part of <a className="text-success" href="https://www.ottlex.org/" target="_blank">On The Table</a>. We wanted to build a tool that explored the sense of what everyone had to say! So we built a language model that cuts up and remixes all of the comments to generate new text.
           </p>
@@ -17,7 +17,7 @@ function About() {
             Are these <em>actual</em> comments people left?
           </h2>
           <p>
-            You are not very likely to see a whole comment that someone actually submitted, but it's not impossible. In fact, some of the generated comments might express the <em>opposite</em> sentiment of originals. Maybe someone didn't want to cut down all the trees in the city, and said so.
+            You are not very likely to see a whole comment that someone actually submitted, but it's not impossible. Actually, some of the generated comments might express the <em>opposite</em> sentiment of originals. Maybe someone didn't want to cut down all the trees in the city, and said so.
           </p>
           <blockquote>
             <span>original</span>
@@ -36,7 +36,7 @@ function About() {
           </p>
           <h2>How does it work? Is this an AI? 🤖</h2>
           <p>
-            This isn't an AI. It's model built on the idea that the next word you see in a sentence is predictable given the words that came before. You can probably guess a few words that are likely to fill in the blank.
+            This isn't an AI. It's a model built on the idea that the next word you see in a sentence is predictable given the words that came before. You can probably guess a few words that are likely to fill in the blank here:
           </p>
           <ul>
             <li>She went to the baker to get a loaf of ___</li>
@@ -45,10 +45,10 @@ function About() {
             The words "baker" and "loaf of" make it more likely that the missing word is "bread" or "sourdough" than "cabbage" or "oranges".
           </p>
           <p>
-            To build a the autocomplete model, we split every comment up into its individual words, then counted up how often every word appeared after the two words that came before it. For example, here's how often the following words appeared after "I want"
+            To build the autocomplete model, we split every comment up into its individual words, then counted up how often every word appeared after the two words that came before it. For example, here's how often the following words appeared after "I want":
           </p>
           
-          <Row>
+          <Row className="mt-1 mb-3">
             <Col md={{ size: 2, offset:2}}>
               <p>"I want..."</p>
             </Col>
@@ -118,8 +118,8 @@ function About() {
             </Col>
           </Row>
 
-        <p>The comment generator and autocomplete tools pick the next word, based on these frequencies, meaning it's more likely to pick a word that appeared more often than a word that appeared less often. If this time it picked "all", the process starts all over again with "want all"</p>
-          <Row>
+        <p>The comment generator and autocomplete tools pick the next word based on these frequencies, meaning they're more likely to pick a word that appeared more often than a word that appeared less often. If this time it picked "all", the process starts all over again with "want all":</p>
+          <Row className="mt-1 mb-3">
             <Col md={{ size: 2, offset:2}}>
               <p>"want all..."</p>
             </Col>
@@ -150,13 +150,13 @@ function About() {
           <hr></hr>
           <h2>Technical Details</h2>
           <p>
-            (Only read on if you care about the technical stuff.)
+            The trigram model was built in R. Qualitative comments were tokenized and named entitites identified via the <a className="text-success" href="https://cran.r-project.org/web/packages/spacyr/" target="_blank">spacyR package</a>, using the <a className="text-success" href="https://spacy.io/models/en#en_core_web_trf" target="_blank">en_core_web_trf model</a>. Some light by-hand text normalization was done to, e.g. expand abbreviations for "St." and "Rd." to "Street" and "Road", as well as trying to normalize all spelling variants of "Lextran". Identified named entities were title cased, the pronoun "I" was upper-cased, and all other tokens lower-cased. A number of punctuation and contraction tokens had their left or right "lean" hand coded for detokenization. The resulting model was written to JSON for processing by the Javascript comment generators.
           </p>
           <p>
-            The trigram model was built in R. Qualitative comments were tokenized and named entitites identified via the <a className="text-success" href="https://cran.r-project.org/web/packages/spacyr/" target="_blank">spacyR package</a>, using the <a className="text-success" href="https://spacy.io/models/en#en_core_web_trf" target="_blank">en_core_web_trf model</a>. Some light by-hand text normalization was done to, e.g. expand abbreviations for "St." and "Rd." to "Street" and "Road", as well as trying to normalize all spelling variants of "Lextran". Identified named entities were title cased, the pronoun "I" was upper-cased, and all other tokens lower-cased. A number of punctuation and contraction tokens had their left or right "lean" hand coded for detokenization. The resulting model was written to json for processing by the javascript comment generators.
+            The site is built in React and hosted on Firebase. Actual token selection is done via calls to the Firebase Realtime Database, and detokenization into the final printed comments is implemented in Javascript. 
           </p>
           <p>
-            The site is built in React and hosted on firebase.
+            All of the code for generating the model and serving the website can be found <a className="text-success" href="https://github.com/rlmead/ott-prediction" target="_blank">on github</a>.
           </p>
 
           {/* <p>This project explores ideas of the residents of Lexington, Kentucky for their city's future through 
