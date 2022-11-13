@@ -107,6 +107,7 @@ function Generate() {
           </Card>
         </Col>
       </Row>
+      <Row className="mb-5 p-2"></Row>
     </Container>
   )
 }
