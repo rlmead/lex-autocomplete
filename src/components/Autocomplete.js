@@ -147,6 +147,7 @@ function Autocomplete() {
           }
         </Col>
       </Row>
+      <Row className="mt-5 mb-5"></Row>
     </Container >
   )
 }
