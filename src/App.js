@@ -8,7 +8,7 @@ import Footer from "./components/Footer";
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = () => setIsOpen(!isOpen);
-  const [view, setView] = useState("Generate");
+  const [view, setView] = useState("Autocomplete");
 
   useEffect(() => {
     const storedView = JSON.parse(window.localStorage.getItem('appView'));
@@ -24,8 +24,8 @@ function App() {
 
 
   let sections = {
-    "Generate": <Generate />,
     "Autocomplete": <Autocomplete />,
+    "Generate": <Generate />,
     "About": <About />
   };
 
