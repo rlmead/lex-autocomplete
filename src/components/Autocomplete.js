@@ -81,6 +81,7 @@ function Autocomplete() {
   }
 
   async function startComment() {
+    setLoading(true);
     setWordChoiceArray([]);
     setCommentArray(['<s>', '<s>']);
     setLeanArray(['', '']);
