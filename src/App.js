@@ -32,7 +32,7 @@ function App() {
   let footerText = {
     "Generate": "Generate a full comment based on ideas from residents of Lexington, KY",
     "Autocomplete": "Choose your own words to create a comment based on ideas from residents of Lexington, KY",
-    "About": <span>Created by <a className="text-white" href="https://also-and.web.app/" target="_blank" rel="noreferrer">B</a> and <a className="text-white" href="https://jofrhwld.github.io/" target="_blank" rel="noreferrer">Joe</a></span>
+    "About": <span>Created by <a className="text-white" href="https://also-and.web.app/" target="_blank" rel="noreferrer">B</a> and <a className="text-white" href="https://jofrhwld.github.io/" target="_blank" rel="noreferrer">Joe</a> for <a className="text-white" href="https://www.civiclex.org/" target="_blank" rel="noreferrer">Civic Lex</a></span>
   };
 
   return (
