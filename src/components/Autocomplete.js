@@ -6,7 +6,7 @@ import Ngram from "./Ngram";
 import Spinners from "./Spinners";
 
 function Autocomplete() {
-  const model = new Ngram;
+  const model = new Ngram();
   const [output, setOutput] = useState('');
   const [writing, setWriting] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,10 +36,10 @@ function Autocomplete() {
 
   useEffect(() => {
     setLoading(false);
-    if (commentArray[commentArray.length - 1] == '<<slash>s>') {
+    if (commentArray[commentArray.length - 1] === '<<slash>s>') {
       setWriting(false);
     }
-    if ([commentArray != '<s>', '<s>']) {
+    if ([commentArray !== '<s>', '<s>']) {
       setOutput(model.print(commentArray.slice(2), leanArray.slice(2)))
     }
     if (writing) {
@@ -145,7 +145,7 @@ function Autocomplete() {
                         className="shadow m-3"
                         id={index}
                         onClick={addWord}>
-                        {item == '<<slash>s>' ? '<End comment>' : model.desanitize(item)}
+                        {item === '<<slash>s>' ? '<End comment>' : model.desanitize(item)}
                       </Button>
                     )
                   })

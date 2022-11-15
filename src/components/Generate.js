@@ -6,7 +6,7 @@ import Ngram from "./Ngram";
 import Spinners from "./Spinners";
 
 function Generate() {
-  const model = new Ngram;
+  const model = new Ngram();
   const [output, setOutput] = useState('');
   const [storedOutput, setStoredOutput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ function Generate() {
   }, [storedOutput])
 
   useEffect(() => {
-    if (output != '') {
+    if (output !== '') {
       window.localStorage.setItem('generateOutput', JSON.stringify(output));
     }
   }, [output])
@@ -62,14 +62,14 @@ function Generate() {
           word = wordData[idx];
           lean = leanData[idx];
         }
-        if (model.desanitize(word) != '</s>') {
+        if (model.desanitize(word) !== '</s>') {
           commentArray.push(word);
           leanArray.push(lean);
         } else {
           finished = true;
         }
       });
-      if (i == 99 && !['...', '.', '?', '!', ',', ';', ':', '-'].includes(model.desanitize(commentArray[commentArray.length - 1]))) {
+      if (i === 99 && !['...', '.', '?', '!', ',', ';', ':', '-'].includes(model.desanitize(commentArray[commentArray.length - 1]))) {
         commentArray.push('...');
         leanArray.push('<');
       }
