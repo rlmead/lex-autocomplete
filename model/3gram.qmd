@@ -398,11 +398,29 @@ The model needs to be re-represented as a json file to be processed for the site
 ```
 
 ```{r}
+verboten = c(".", "#", "$", "/", "[", "]")
+```
+
+Firebase Realtime Database forbids special characters in `verboten` in object keys. Replacing with special labels.
+
+```{r}
 #| label: pre_probs
 model %>%
+  ungroup() %>%
+  mutate(across(.cols = word_i:word_k, .fns = ~str_replace_all(.x, "\\.", "<dot>")),
+         across(.cols = word_i:word_k, .fns = ~str_replace_all(.x, "/", "<slash>")),
+         across(.cols = word_i:word_k, .fns = ~str_replace_all(.x, "\\$", "<dollar>")),
+         across(.cols = word_i:word_k, .fns = ~str_replace_all(.x, "#", "<hash>")),
+         across(.cols = word_i:word_k, .fns = ~str_replace_all(.x, "\\[", "<lbracket>")),
+         across(.cols = word_i:word_k, .fns = ~str_replace_all(.x, "\\]", "<rbracket>"))) %>%
   group_by(word_i, word_j) %>%
   arrange(cond_prob) %>%
-  mutate(sum_prob = cumsum(cond_prob)) ->model_prep
+  mutate(sum_prob = cumsum(cond_prob))->model_prep
+```
+
+```{r}
+model_prep %>%
+  filter(word_j == "</s>")
 ```
 
 ```{r}

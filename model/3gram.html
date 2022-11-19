@@ -2965,7 +2965,7 @@ P(w_k|w_i,w_j) = \frac{C(w_i, w_j, w_k)}{C(w_i, w_j)}
 <pre><code># A tibble: 1 × 7
   word_i word_j word_k dir   trigram_count bigram_count cond_prob
   &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;         &lt;int&gt;        &lt;int&gt;     &lt;dbl&gt;
-1 &lt;s&gt;    &lt;s&gt;    more   &quot;&quot;              271         1672     0.162</code></pre>
+1 &lt;s&gt;    &lt;s&gt;    fund   &quot;&quot;                1         1672  0.000598</code></pre>
 </div>
 </div>
 <p>The actual site will generate comments using javascript, but this is a mockup to explore what’s necessary.</p>
@@ -3023,7 +3023,7 @@ P(w_k|w_i,w_j) = \frac{C(w_i, w_j, w_k)}{C(w_i, w_j)}
 <div class="cell">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">generate</span>(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] &quot;Our public transit. Good luck with that one. People would use public transit needs longer hours/to run more frequently&quot;</code></pre>
+<pre><code>[1] &quot;The city operations. Evs are quiet, don&#39;t take an hour and a half to go away. We need more buses&quot;</code></pre>
 </div>
 </div>
 </section>
@@ -3046,43 +3046,64 @@ P(w_k|w_i,w_j) = \frac{C(w_i, w_j, w_k)}{C(w_i, w_j)}
 <span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>model <span class="sc">%&gt;%</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_i, word_j) <span class="sc">%&gt;%</span></span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(cond_prob) <span class="sc">%&gt;%</span></span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sum_prob =</span> <span class="fu">cumsum</span>(cond_prob)) <span class="ot">-&gt;</span>model_prep</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>verboten <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;.&quot;</span>, <span class="st">&quot;#&quot;</span>, <span class="st">&quot;$&quot;</span>, <span class="st">&quot;/&quot;</span>, <span class="st">&quot;[&quot;</span>, <span class="st">&quot;]&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Firebase Realtime Database forbids special characters in <code>verboten</code> in object keys. Replacing with special labels.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>outer_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>model <span class="sc">%&gt;%</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="at">.cols =</span> word_i<span class="sc">:</span>word_k, <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.&quot;</span>, <span class="st">&quot;&lt;dot&gt;&quot;</span>)),</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>         <span class="fu">across</span>(<span class="at">.cols =</span> word_i<span class="sc">:</span>word_k, <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="st">&quot;/&quot;</span>, <span class="st">&quot;&lt;slash&gt;&quot;</span>)),</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>         <span class="fu">across</span>(<span class="at">.cols =</span> word_i<span class="sc">:</span>word_k, <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">$&quot;</span>, <span class="st">&quot;&lt;dollar&gt;&quot;</span>)),</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>         <span class="fu">across</span>(<span class="at">.cols =</span> word_i<span class="sc">:</span>word_k, <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="st">&quot;#&quot;</span>, <span class="st">&quot;&lt;hash&gt;&quot;</span>)),</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>         <span class="fu">across</span>(<span class="at">.cols =</span> word_i<span class="sc">:</span>word_k, <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">[&quot;</span>, <span class="st">&quot;&lt;lbracket&gt;&quot;</span>)),</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>         <span class="fu">across</span>(<span class="at">.cols =</span> word_i<span class="sc">:</span>word_k, <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">]&quot;</span>, <span class="st">&quot;&lt;rbracket&gt;&quot;</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_i, word_j) <span class="sc">%&gt;%</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(cond_prob) <span class="sc">%&gt;%</span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sum_prob =</span> <span class="fu">cumsum</span>(cond_prob))<span class="ot">-&gt;</span>model_prep</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>model_prep <span class="sc">%&gt;%</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_i, word_j) <span class="sc">%&gt;%</span></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_i) <span class="sc">%&gt;%</span></span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="ot">-&gt;</span> all_nest</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(word_j <span class="sc">==</span> <span class="st">&quot;&lt;/s&gt;&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 0 × 8
+# Groups:   word_i, word_j [0]
+# … with 8 variables: word_i &lt;chr&gt;, word_j &lt;chr&gt;, word_k &lt;chr&gt;, dir &lt;chr&gt;,
+#   trigram_count &lt;int&gt;, bigram_count &lt;int&gt;, cond_prob &lt;dbl&gt;, sum_prob &lt;dbl&gt;</code></pre>
+</div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_along</span>(all_nest<span class="sc">$</span>word_i)){</span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  w_i <span class="ot">&lt;-</span> all_nest<span class="sc">$</span>word_i[i]</span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  outer_list[[w_i]] <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  inner_j <span class="ot">&lt;-</span> all_nest<span class="sc">$</span>data[[i]]</span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="fu">seq_along</span>(inner_j<span class="sc">$</span>word_j)){</span>
-<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>    w_j <span class="ot">&lt;-</span> inner_j<span class="sc">$</span>word_j[j]</span>
-<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]] <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>    inner_k <span class="ot">&lt;-</span> inner_j<span class="sc">$</span>data[[j]]</span>
-<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;next_word&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>word_k</span>
-<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;sum_prob&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>sum_prob</span>
-<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;cond_prob&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>cond_prob</span>
-<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;lean&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>dir</span>
-<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>outer_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>jsonData <span class="ot">&lt;-</span> <span class="fu">toJSON</span>(outer_list, <span class="at">indent =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>model_prep <span class="sc">%&gt;%</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_i, word_j) <span class="sc">%&gt;%</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_i) <span class="sc">%&gt;%</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="ot">-&gt;</span> all_nest</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(jsonData, <span class="at">file =</span> <span class="st">&quot;../data/model.json&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_along</span>(all_nest<span class="sc">$</span>word_i)){</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  w_i <span class="ot">&lt;-</span> all_nest<span class="sc">$</span>word_i[i]</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  outer_list[[w_i]] <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  inner_j <span class="ot">&lt;-</span> all_nest<span class="sc">$</span>data[[i]]</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="fu">seq_along</span>(inner_j<span class="sc">$</span>word_j)){</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>    w_j <span class="ot">&lt;-</span> inner_j<span class="sc">$</span>word_j[j]</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]] <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>    inner_k <span class="ot">&lt;-</span> inner_j<span class="sc">$</span>data[[j]]</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;next_word&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>word_k</span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;sum_prob&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>sum_prob</span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;cond_prob&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>cond_prob</span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;lean&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>dir</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>jsonData <span class="ot">&lt;-</span> <span class="fu">toJSON</span>(outer_list, <span class="at">indent =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(jsonData, <span class="at">file =</span> <span class="st">&quot;../data/model.json&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <!-- -->
 
@@ -3274,456 +3295,474 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class>
-<div class="sourceCode" id="cb51" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> &quot;3gram Model&quot;</span></span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> &quot;Josef Fruehwald&quot;</span></span>
-<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> today</span></span>
-<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span><span class="co"> visual</span></span>
-<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a><span class="an">license:</span><span class="co"> MIT</span></span>
-<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
-<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
-<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a><span class="co">    embed-resources: true</span></span>
-<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a><span class="co">    theme: darkly</span></span>
-<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a><span class="an">code-tools:</span><span class="co"> true</span></span>
-<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Setup</span></span>
-<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a>I&#39;m going to try to keep the install size small, so rather than installing the whole tidyverse metapackage, I&#39;ll just install the specific libraries I use.</span>
-<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a>Requires <span class="in">`renv`</span> and <span class="in">`reticulate`</span>.</span>
-<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-22"><a href="#cb51-22" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-23"><a href="#cb51-23" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: install</span></span>
-<span id="cb51-24"><a href="#cb51-24" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb51-25"><a href="#cb51-25" aria-hidden="true" tabindex="-1"></a><span class="co"># ensure renv is activated</span></span>
-<span id="cb51-26"><a href="#cb51-26" aria-hidden="true" tabindex="-1"></a><span class="co"># source(&quot;.Rprofile)</span></span>
-<span id="cb51-27"><a href="#cb51-27" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">refresh</span>()</span>
-<span id="cb51-28"><a href="#cb51-28" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-29"><a href="#cb51-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-32"><a href="#cb51-32" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-33"><a href="#cb51-33" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: main_libraries</span></span>
-<span id="cb51-34"><a href="#cb51-34" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb51-35"><a href="#cb51-35" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
-<span id="cb51-36"><a href="#cb51-36" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
-<span id="cb51-37"><a href="#cb51-37" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
-<span id="cb51-38"><a href="#cb51-38" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
-<span id="cb51-39"><a href="#cb51-39" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rjson)</span>
-<span id="cb51-40"><a href="#cb51-40" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-41"><a href="#cb51-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-44"><a href="#cb51-44" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-45"><a href="#cb51-45" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: spacyr</span></span>
-<span id="cb51-46"><a href="#cb51-46" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(spacyr)</span>
-<span id="cb51-47"><a href="#cb51-47" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-48"><a href="#cb51-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-49"><a href="#cb51-49" aria-hidden="true" tabindex="-1"></a>I had to sidestep <span class="in">`spacyr`</span>&#39;s approach to installing and downloading spaCy and its language models, but I found I could sidestep it by directly installing spacy and its language models into the conda environment <span class="in">`spacyr`</span> expects.</span>
-<span id="cb51-50"><a href="#cb51-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-53"><a href="#cb51-53" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
-<span id="cb51-54"><a href="#cb51-54" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb51-55"><a href="#cb51-55" aria-hidden="true" tabindex="-1"></a><span class="co">#| filename: &quot;spacy_install.sh&quot;</span></span>
-<span id="cb51-56"><a href="#cb51-56" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">--yes</span> <span class="at">--name</span> spacy_condaenv python=3.8 spacy <span class="at">-c</span> conda-forge</span>
-<span id="cb51-57"><a href="#cb51-57" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate spacy_condaenv</span>
-<span id="cb51-58"><a href="#cb51-58" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> spacy download en_core_web_trf</span>
-<span id="cb51-59"><a href="#cb51-59" aria-hidden="true" tabindex="-1"></a><span class="co"># fallback</span></span>
-<span id="cb51-60"><a href="#cb51-60" aria-hidden="true" tabindex="-1"></a><span class="co"># python -m spacy download en_core_web_sm</span></span>
-<span id="cb51-61"><a href="#cb51-61" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-62"><a href="#cb51-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-65"><a href="#cb51-65" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-66"><a href="#cb51-66" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb51-67"><a href="#cb51-67" aria-hidden="true" tabindex="-1"></a><span class="fu">spacy_install</span>(<span class="at">lang_models =</span> <span class="st">&quot;en_core_web_trf&quot;</span>)</span>
-<span id="cb51-68"><a href="#cb51-68" aria-hidden="true" tabindex="-1"></a><span class="co"># fallback</span></span>
-<span id="cb51-69"><a href="#cb51-69" aria-hidden="true" tabindex="-1"></a><span class="co"># spacy_install(lang_models = &quot;en_core_web_sm&quot;)</span></span>
-<span id="cb51-70"><a href="#cb51-70" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-71"><a href="#cb51-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-74"><a href="#cb51-74" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-75"><a href="#cb51-75" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: initialize_model</span></span>
-<span id="cb51-76"><a href="#cb51-76" aria-hidden="true" tabindex="-1"></a><span class="fu">spacy_initialize</span>(<span class="at">model =</span> <span class="st">&quot;en_core_web_trf&quot;</span>)</span>
-<span id="cb51-77"><a href="#cb51-77" aria-hidden="true" tabindex="-1"></a><span class="co"># fallback</span></span>
-<span id="cb51-78"><a href="#cb51-78" aria-hidden="true" tabindex="-1"></a><span class="co"># spacy_initialize(model = &quot;en_core_web_sm)</span></span>
-<span id="cb51-79"><a href="#cb51-79" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-80"><a href="#cb51-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-81"><a href="#cb51-81" aria-hidden="true" tabindex="-1"></a><span class="fu">## Load Raw Data</span></span>
-<span id="cb51-82"><a href="#cb51-82" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-85"><a href="#cb51-85" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-86"><a href="#cb51-86" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: raw_data_read</span></span>
-<span id="cb51-87"><a href="#cb51-87" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;../data/Codes Summed-Main View.csv&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb51-88"><a href="#cb51-88" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rename_with</span>(<span class="sc">~</span><span class="fu">tolower</span>(<span class="fu">gsub</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">s&quot;</span>, <span class="st">&quot;_&quot;</span>, .x)))</span>
-<span id="cb51-89"><a href="#cb51-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-90"><a href="#cb51-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-91"><a href="#cb51-91" aria-hidden="true" tabindex="-1"></a>Checking to ensure there is a unique value of <span class="in">`Response`</span> for every row.</span>
-<span id="cb51-92"><a href="#cb51-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-95"><a href="#cb51-95" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-96"><a href="#cb51-96" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: quality_check</span></span>
-<span id="cb51-97"><a href="#cb51-97" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(dat) <span class="sc">==</span> <span class="fu">length</span>(<span class="fu">unique</span>(dat<span class="sc">$</span>response))</span>
-<span id="cb51-98"><a href="#cb51-98" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(dat)</span>
-<span id="cb51-99"><a href="#cb51-99" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-100"><a href="#cb51-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-101"><a href="#cb51-101" aria-hidden="true" tabindex="-1"></a>Focusing in on the qualitative comments.</span>
-<span id="cb51-102"><a href="#cb51-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-105"><a href="#cb51-105" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-106"><a href="#cb51-106" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: corpus_focus</span></span>
-<span id="cb51-107"><a href="#cb51-107" aria-hidden="true" tabindex="-1"></a>dat <span class="sc">%&gt;%</span></span>
-<span id="cb51-108"><a href="#cb51-108" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(response, qualitative_response) <span class="sc">%&gt;%</span></span>
-<span id="cb51-109"><a href="#cb51-109" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">qualitative_response =</span> <span class="fu">str_replace_all</span>(qualitative_response, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">s+&quot;</span>, <span class="st">&quot; &quot;</span>))<span class="ot">-&gt;</span> corpus</span>
-<span id="cb51-110"><a href="#cb51-110" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-111"><a href="#cb51-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-112"><a href="#cb51-112" aria-hidden="true" tabindex="-1"></a><span class="fu">## Processing</span></span>
-<span id="cb51-113"><a href="#cb51-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-114"><a href="#cb51-114" aria-hidden="true" tabindex="-1"></a><span class="fu">### spaCy Parse</span></span>
-<span id="cb51-115"><a href="#cb51-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-116"><a href="#cb51-116" aria-hidden="true" tabindex="-1"></a>Using spacy&#39;s models to tokenize the comments and annotate part of speech and entity tags.</span>
-<span id="cb51-117"><a href="#cb51-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-120"><a href="#cb51-120" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-121"><a href="#cb51-121" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: spacy_parse</span></span>
-<span id="cb51-122"><a href="#cb51-122" aria-hidden="true" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">TOKENIZERS_PARALLELISM=</span><span class="st">&quot;false&quot;</span>)</span>
-<span id="cb51-123"><a href="#cb51-123" aria-hidden="true" tabindex="-1"></a>comment_parse <span class="ot">&lt;-</span> <span class="fu">spacy_parse</span>(corpus<span class="sc">$</span>qualitative_response)</span>
-<span id="cb51-124"><a href="#cb51-124" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-125"><a href="#cb51-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-126"><a href="#cb51-126" aria-hidden="true" tabindex="-1"></a><span class="fu">### Define padding function</span></span>
-<span id="cb51-127"><a href="#cb51-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-128"><a href="#cb51-128" aria-hidden="true" tabindex="-1"></a><span class="in">`pad_df()`</span> will add sequence start and end padding.</span>
-<span id="cb51-129"><a href="#cb51-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-132"><a href="#cb51-132" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-133"><a href="#cb51-133" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: def_pad_df</span></span>
-<span id="cb51-134"><a href="#cb51-134" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; Pad comments for ngram</span></span>
-<span id="cb51-135"><a href="#cb51-135" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; </span></span>
-<span id="cb51-136"><a href="#cb51-136" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; Function expects a data frame output from \code{spacy_parse()} that has had its</span></span>
-<span id="cb51-137"><a href="#cb51-137" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; entities consolidated</span></span>
-<span id="cb51-138"><a href="#cb51-138" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; </span></span>
-<span id="cb51-139"><a href="#cb51-139" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param df a df outpuyt from \code{spacy_parse()}</span></span>
-<span id="cb51-140"><a href="#cb51-140" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param n the pad size (should be ngram size minus one)</span></span>
-<span id="cb51-141"><a href="#cb51-141" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @start_symbol the start of sequence symbol</span></span>
-<span id="cb51-142"><a href="#cb51-142" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @end_symbol the end of sequence symbol</span></span>
-<span id="cb51-143"><a href="#cb51-143" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; </span></span>
-<span id="cb51-144"><a href="#cb51-144" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @returns The same df, but padded out with \code{start_symbok} and \code{end_symbol}</span></span>
-<span id="cb51-145"><a href="#cb51-145" aria-hidden="true" tabindex="-1"></a>pad_df <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">n =</span> <span class="dv">2</span>, <span class="at">start_symbol =</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, <span class="at">end_symbol =</span> <span class="st">&quot;&lt;/s&gt;&quot;</span>){</span>
-<span id="cb51-146"><a href="#cb51-146" aria-hidden="true" tabindex="-1"></a>  start_pad <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">token =</span> <span class="fu">rep</span>(start_symbol, <span class="at">times =</span> n))</span>
-<span id="cb51-147"><a href="#cb51-147" aria-hidden="true" tabindex="-1"></a>  end_pad <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">token =</span> <span class="fu">rep</span>(end_symbol, <span class="at">times =</span> n))</span>
-<span id="cb51-148"><a href="#cb51-148" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(start_pad, df, end_pad) <span class="sc">%&gt;%</span></span>
-<span id="cb51-149"><a href="#cb51-149" aria-hidden="true" tabindex="-1"></a>          <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">sentence_id =</span> <span class="dv">0</span>, <span class="at">token_id =</span> <span class="dv">0</span>, <span class="at">pos =</span> <span class="st">&#39;&#39;</span>, </span>
-<span id="cb51-150"><a href="#cb51-150" aria-hidden="true" tabindex="-1"></a>                          <span class="at">entity_type =</span> <span class="st">&#39;&#39;</span>, <span class="at">dir =</span> <span class="st">&#39;&#39;</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb51-151"><a href="#cb51-151" aria-hidden="true" tabindex="-1"></a>          <span class="fu">mutate</span>(<span class="at">lemma =</span> token)</span>
-<span id="cb51-152"><a href="#cb51-152" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(out)</span>
-<span id="cb51-153"><a href="#cb51-153" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb51-154"><a href="#cb51-154" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-155"><a href="#cb51-155" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-156"><a href="#cb51-156" aria-hidden="true" tabindex="-1"></a><span class="fu">### Text normalization</span></span>
-<span id="cb51-157"><a href="#cb51-157" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-158"><a href="#cb51-158" aria-hidden="true" tabindex="-1"></a>Only certain consolidated entities should be title cased.</span>
-<span id="cb51-159"><a href="#cb51-159" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-162"><a href="#cb51-162" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-163"><a href="#cb51-163" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: def_titlecase</span></span>
-<span id="cb51-164"><a href="#cb51-164" aria-hidden="true" tabindex="-1"></a>types_to_titlecase <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;EVENT&quot;</span>, <span class="st">&quot;FAC&quot;</span>, <span class="st">&quot;GPE&quot;</span>, <span class="st">&quot;LANGUAGE&quot;</span>, <span class="st">&quot;LAW&quot;</span>, <span class="st">&quot;LOC&quot;</span>, <span class="st">&quot;NORP&quot;</span>,</span>
-<span id="cb51-165"><a href="#cb51-165" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;ORG&quot;</span>, <span class="st">&quot;PERSON&quot;</span>, <span class="st">&quot;PRODUCT&quot;</span>, <span class="st">&quot;WORK_OF_ART&quot;</span>)</span>
-<span id="cb51-166"><a href="#cb51-166" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-167"><a href="#cb51-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-168"><a href="#cb51-168" aria-hidden="true" tabindex="-1"></a>Here we normalize certain street name abbreviations so that they&#39;ll be counted up as a single type. Otherwise <span class="in">`&quot;Nicholasville Road&quot;`</span>, <span class="in">`&quot;Nicholasville Rd&quot;`</span>, and <span class="in">`&quot;Nicholasville rd&quot;`</span> would have all gotten different probability distributions.</span>
-<span id="cb51-169"><a href="#cb51-169" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-170"><a href="#cb51-170" aria-hidden="true" tabindex="-1"></a>Additionally, multiple spellings, spacings, and capitalizations of the transit system, Lextran, were normalized to <span class="in">`&quot;Lextran&quot;`</span>. Examples I saw included</span>
-<span id="cb51-171"><a href="#cb51-171" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-172"><a href="#cb51-172" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`lextran`</span></span>
-<span id="cb51-173"><a href="#cb51-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-174"><a href="#cb51-174" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`Lextran`</span></span>
-<span id="cb51-175"><a href="#cb51-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-176"><a href="#cb51-176" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`LEXTRAN`</span></span>
-<span id="cb51-177"><a href="#cb51-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-178"><a href="#cb51-178" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`Lex Tran`</span></span>
-<span id="cb51-179"><a href="#cb51-179" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-180"><a href="#cb51-180" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`LexTran`</span></span>
-<span id="cb51-181"><a href="#cb51-181" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-182"><a href="#cb51-182" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`Lex-tran`</span></span>
-<span id="cb51-183"><a href="#cb51-183" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-186"><a href="#cb51-186" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-187"><a href="#cb51-187" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: normalize_and_pad</span></span>
-<span id="cb51-188"><a href="#cb51-188" aria-hidden="true" tabindex="-1"></a>comment_parse <span class="sc">%&gt;%</span></span>
-<span id="cb51-189"><a href="#cb51-189" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">token =</span> <span class="fu">case_when</span>(entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;Ave&quot;</span> <span class="sc">~</span> <span class="st">&quot;Avenue&quot;</span>,</span>
-<span id="cb51-190"><a href="#cb51-190" aria-hidden="true" tabindex="-1"></a>                           entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;Pkwy&quot;</span> <span class="sc">~</span> <span class="st">&quot;Parkway&quot;</span>,</span>
-<span id="cb51-191"><a href="#cb51-191" aria-hidden="true" tabindex="-1"></a>                           entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;Rd&quot;</span> <span class="sc">~</span> <span class="st">&quot;Road&quot;</span>,</span>
-<span id="cb51-192"><a href="#cb51-192" aria-hidden="true" tabindex="-1"></a>                           entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;rd&quot;</span> <span class="sc">~</span> <span class="st">&quot;Road&quot;</span>,</span>
-<span id="cb51-193"><a href="#cb51-193" aria-hidden="true" tabindex="-1"></a>                           entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;St.&quot;</span> <span class="sc">~</span> <span class="st">&quot;Street&quot;</span> ,</span>
-<span id="cb51-194"><a href="#cb51-194" aria-hidden="true" tabindex="-1"></a>                           <span class="cn">TRUE</span> <span class="sc">~</span> token)) <span class="sc">%&gt;%</span></span>
-<span id="cb51-195"><a href="#cb51-195" aria-hidden="true" tabindex="-1"></a>  <span class="fu">entity_consolidate</span>(<span class="at">concatenator =</span> <span class="st">&quot; &quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb51-196"><a href="#cb51-196" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">token =</span> <span class="fu">case_when</span>(entity_type <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> </span>
-<span id="cb51-197"><a href="#cb51-197" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">str_detect</span>(token, </span>
-<span id="cb51-198"><a href="#cb51-198" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">&quot;^[Ll][Ee][Xx]</span><span class="sc">\\</span><span class="st">W*[Tt][Rr][Aa][Nn]$&quot;</span>) <span class="sc">~</span> <span class="st">&quot;Lextran&quot;</span>,</span>
-<span id="cb51-199"><a href="#cb51-199" aria-hidden="true" tabindex="-1"></a>                           entity_type <span class="sc">%in%</span> types_to_titlecase <span class="sc">&amp;</span></span>
-<span id="cb51-200"><a href="#cb51-200" aria-hidden="true" tabindex="-1"></a>                             <span class="sc">!</span><span class="fu">str_detect</span>(token, <span class="st">&quot;^[:upper:]+$&quot;</span>) <span class="sc">~</span> <span class="fu">str_to_title</span>(token),</span>
-<span id="cb51-201"><a href="#cb51-201" aria-hidden="true" tabindex="-1"></a>                           pos <span class="sc">==</span> <span class="st">&quot;PRON&quot;</span> <span class="sc">&amp;</span> <span class="fu">str_detect</span>(token, <span class="st">&quot;^[Ii]$&quot;</span>) <span class="sc">~</span> <span class="st">&quot;I&quot;</span>,</span>
-<span id="cb51-202"><a href="#cb51-202" aria-hidden="true" tabindex="-1"></a>                           <span class="cn">TRUE</span> <span class="sc">~</span> <span class="fu">tolower</span>(token)))<span class="ot">-&gt;</span>consolidated</span>
-<span id="cb51-203"><a href="#cb51-203" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-204"><a href="#cb51-204" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-205"><a href="#cb51-205" aria-hidden="true" tabindex="-1"></a><span class="fu">### Coding of &quot;leaners&quot;</span></span>
-<span id="cb51-206"><a href="#cb51-206" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-207"><a href="#cb51-207" aria-hidden="true" tabindex="-1"></a>Certain tokens are &quot;leaners&quot;. Some tokens lean left, and should have no whitespace between them and the previous token with detokenied:</span>
-<span id="cb51-208"><a href="#cb51-208" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-209"><a href="#cb51-209" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`&quot;also&quot;`</span> <span class="in">`&quot;,&quot;`</span> (leans left) -<span class="sc">\&gt;</span> <span class="in">`&quot;also,&quot;`</span></span>
-<span id="cb51-210"><a href="#cb51-210" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-211"><a href="#cb51-211" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`&quot;I&quot;`</span> <span class="in">`&quot;&#39;m&quot;`</span> (leans left) -<span class="sc">\&gt;</span> <span class="in">`&quot;I&#39;m&quot;`</span></span>
-<span id="cb51-212"><a href="#cb51-212" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-213"><a href="#cb51-213" aria-hidden="true" tabindex="-1"></a>Some tokens lean right, and should have no whitespace with the following token</span>
-<span id="cb51-214"><a href="#cb51-214" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-215"><a href="#cb51-215" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`&quot;(&quot;`</span> <span class="in">`&quot;incidentally&quot;`</span> (leans right) -<span class="sc">\&gt;</span> <span class="in">`&quot;(incidentally&quot;`</span></span>
-<span id="cb51-216"><a href="#cb51-216" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-217"><a href="#cb51-217" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`&quot;“&quot;`</span> <span class="in">`&quot;so-called&quot;`</span> (leans right) -<span class="sc">\&gt;</span> <span class="in">`&quot;“so-called&quot;`</span></span>
-<span id="cb51-218"><a href="#cb51-218" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-219"><a href="#cb51-219" aria-hidden="true" tabindex="-1"></a>Some tokens lean left *and* right, and should have no whitespace in either direction when detokenized</span>
-<span id="cb51-220"><a href="#cb51-220" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-221"><a href="#cb51-221" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`&quot;and&quot;`</span> <span class="in">`&quot;/&quot;`</span> <span class="in">`&quot;or&quot;`</span> (leans both ways) -<span class="sc">\&gt;</span> <span class="in">`&quot;and/or&quot;`</span></span>
-<span id="cb51-222"><a href="#cb51-222" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-223"><a href="#cb51-223" aria-hidden="true" tabindex="-1"></a>These were hand coded based on the tokens that appeared in the corpus, so I don&#39;t re-reun these blocks afterwards to prevent overwriting the hand coding.</span>
-<span id="cb51-224"><a href="#cb51-224" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-227"><a href="#cb51-227" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-228"><a href="#cb51-228" aria-hidden="true" tabindex="-1"></a><span class="co"># consolidated %&gt;%</span></span>
-<span id="cb51-229"><a href="#cb51-229" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(str_detect(token, &quot;&#39;\\w+?&quot;)) %&gt;%</span></span>
-<span id="cb51-230"><a href="#cb51-230" aria-hidden="true" tabindex="-1"></a><span class="co">#   count(token) %&gt;%</span></span>
-<span id="cb51-231"><a href="#cb51-231" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(desc(n)) %&gt;%</span></span>
-<span id="cb51-232"><a href="#cb51-232" aria-hidden="true" tabindex="-1"></a><span class="co">#   slice(1:7) %&gt;%</span></span>
-<span id="cb51-233"><a href="#cb51-233" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(-n) %&gt;%</span></span>
-<span id="cb51-234"><a href="#cb51-234" aria-hidden="true" tabindex="-1"></a><span class="co">#   write_csv(file = &quot;../data/00_leaners.csv&quot;)</span></span>
-<span id="cb51-235"><a href="#cb51-235" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-236"><a href="#cb51-236" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-239"><a href="#cb51-239" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-240"><a href="#cb51-240" aria-hidden="true" tabindex="-1"></a><span class="co"># consolidated %&gt;%</span></span>
-<span id="cb51-241"><a href="#cb51-241" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(pos == &quot;PUNCT&quot;) %&gt;%</span></span>
-<span id="cb51-242"><a href="#cb51-242" aria-hidden="true" tabindex="-1"></a><span class="co">#   count(token) %&gt;%</span></span>
-<span id="cb51-243"><a href="#cb51-243" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(desc(n)) %&gt;%</span></span>
-<span id="cb51-244"><a href="#cb51-244" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(-n) %&gt;%</span></span>
-<span id="cb51-245"><a href="#cb51-245" aria-hidden="true" tabindex="-1"></a><span class="co">#   write_csv(&quot;../data/01_leaners.csv&quot;)</span></span>
-<span id="cb51-246"><a href="#cb51-246" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-247"><a href="#cb51-247" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-250"><a href="#cb51-250" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-251"><a href="#cb51-251" aria-hidden="true" tabindex="-1"></a><span class="co"># consolidated %&gt;%</span></span>
-<span id="cb51-252"><a href="#cb51-252" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(str_detect(token, &quot;’\\w+?&quot;)) %&gt;%</span></span>
-<span id="cb51-253"><a href="#cb51-253" aria-hidden="true" tabindex="-1"></a><span class="co">#   count(token) %&gt;%</span></span>
-<span id="cb51-254"><a href="#cb51-254" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(desc(n)) %&gt;%</span></span>
-<span id="cb51-255"><a href="#cb51-255" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(-n) %&gt;%</span></span>
-<span id="cb51-256"><a href="#cb51-256" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(dir = &quot;&lt;&quot;) %&gt;%</span></span>
-<span id="cb51-257"><a href="#cb51-257" aria-hidden="true" tabindex="-1"></a><span class="co">#   slice(1:7) %&gt;%</span></span>
-<span id="cb51-258"><a href="#cb51-258" aria-hidden="true" tabindex="-1"></a><span class="co">#   write_csv(file = &quot;../data/02_leaners.csv&quot;)</span></span>
-<span id="cb51-259"><a href="#cb51-259" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-260"><a href="#cb51-260" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-263"><a href="#cb51-263" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-264"><a href="#cb51-264" aria-hidden="true" tabindex="-1"></a><span class="co">#| lavbel: read_in_lean</span></span>
-<span id="cb51-265"><a href="#cb51-265" aria-hidden="true" tabindex="-1"></a>lean_df <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="fu">list.files</span>(<span class="at">path =</span> <span class="st">&quot;../data/&quot;</span>, <span class="at">pattern =</span> <span class="st">&quot;*_leaners.csv&quot;</span>, <span class="at">full.names =</span> T), read_csv)</span>
-<span id="cb51-266"><a href="#cb51-266" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-267"><a href="#cb51-267" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-268"><a href="#cb51-268" aria-hidden="true" tabindex="-1"></a>After joining on the lean coding, normalize smart quotes. This wasn&#39;t done prior to lean coding so that I *could* code left and right lean for <span class="in">`“`</span> etc.</span>
-<span id="cb51-269"><a href="#cb51-269" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-272"><a href="#cb51-272" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-273"><a href="#cb51-273" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: code_lean</span></span>
-<span id="cb51-274"><a href="#cb51-274" aria-hidden="true" tabindex="-1"></a>consolidated <span class="sc">%&gt;%</span></span>
-<span id="cb51-275"><a href="#cb51-275" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">id =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">n</span>())<span class="sc">%&gt;%</span></span>
-<span id="cb51-276"><a href="#cb51-276" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(lean_df) <span class="sc">%&gt;%</span></span>
-<span id="cb51-277"><a href="#cb51-277" aria-hidden="true" tabindex="-1"></a>  <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">dir =</span> <span class="st">&quot;&quot;</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb51-278"><a href="#cb51-278" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">token =</span> <span class="fu">str_replace_all</span>(token, <span class="st">&quot;[’‘]&quot;</span>, <span class="st">&quot;&#39;&quot;</span>),</span>
-<span id="cb51-279"><a href="#cb51-279" aria-hidden="true" tabindex="-1"></a>         <span class="at">token =</span> <span class="fu">str_replace_all</span>(token, <span class="st">&quot;[“”]&quot;</span>, <span class="st">&#39;&quot;&#39;</span>)) <span class="ot">-&gt;</span> lean_coded</span>
-<span id="cb51-280"><a href="#cb51-280" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-281"><a href="#cb51-281" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-282"><a href="#cb51-282" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-283"><a href="#cb51-283" aria-hidden="true" tabindex="-1"></a>Now, do actual padding by comment.</span>
-<span id="cb51-284"><a href="#cb51-284" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-287"><a href="#cb51-287" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-288"><a href="#cb51-288" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: pad</span></span>
-<span id="cb51-289"><a href="#cb51-289" aria-hidden="true" tabindex="-1"></a>lean_coded <span class="sc">%&gt;%</span></span>
-<span id="cb51-290"><a href="#cb51-290" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(id) <span class="sc">%&gt;%</span></span>
-<span id="cb51-291"><a href="#cb51-291" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(doc_id) <span class="sc">%&gt;%</span></span>
-<span id="cb51-292"><a href="#cb51-292" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb51-293"><a href="#cb51-293" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">padded =</span> <span class="fu">map</span>(data, pad_df)) <span class="ot">-&gt;</span> pad_nest</span>
-<span id="cb51-294"><a href="#cb51-294" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-295"><a href="#cb51-295" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-296"><a href="#cb51-296" aria-hidden="true" tabindex="-1"></a><span class="fu">## Make the Trigram Model</span></span>
-<span id="cb51-297"><a href="#cb51-297" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-298"><a href="#cb51-298" aria-hidden="true" tabindex="-1"></a>Making the trigrams by lagging <span class="in">`token`</span> 1 and 2 times within comment.</span>
-<span id="cb51-299"><a href="#cb51-299" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-302"><a href="#cb51-302" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-303"><a href="#cb51-303" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: make_trigrams</span></span>
-<span id="cb51-304"><a href="#cb51-304" aria-hidden="true" tabindex="-1"></a>pad_nest <span class="sc">%&gt;%</span></span>
-<span id="cb51-305"><a href="#cb51-305" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>data) <span class="sc">%&gt;%</span></span>
-<span id="cb51-306"><a href="#cb51-306" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(padded) <span class="sc">%&gt;%</span></span>
-<span id="cb51-307"><a href="#cb51-307" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(doc_id, token, pos, entity_type, dir) <span class="sc">%&gt;%</span></span>
-<span id="cb51-308"><a href="#cb51-308" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(doc_id) <span class="sc">%&gt;%</span></span>
-<span id="cb51-309"><a href="#cb51-309" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">word_i =</span> <span class="fu">lag</span>(token, <span class="dv">2</span>),</span>
-<span id="cb51-310"><a href="#cb51-310" aria-hidden="true" tabindex="-1"></a>         <span class="at">word_j =</span> <span class="fu">lag</span>(token, <span class="dv">1</span>),</span>
-<span id="cb51-311"><a href="#cb51-311" aria-hidden="true" tabindex="-1"></a>         <span class="at">word_k =</span> token) <span class="sc">%&gt;%</span></span>
-<span id="cb51-312"><a href="#cb51-312" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()<span class="ot">-&gt;</span> trigrams</span>
-<span id="cb51-313"><a href="#cb51-313" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-314"><a href="#cb51-314" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-315"><a href="#cb51-315" aria-hidden="true" tabindex="-1"></a>In order to generate comments from the bigrams, we&#39;ll need to get the conditional probability of <span class="in">`word_k`</span> from the preceding sequence <span class="in">`word_i, word_j`</span>.</span>
-<span id="cb51-316"><a href="#cb51-316" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-317"><a href="#cb51-317" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb51-318"><a href="#cb51-318" aria-hidden="true" tabindex="-1"></a>P(w_k | w_i,w_j)</span>
-<span id="cb51-319"><a href="#cb51-319" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb51-320"><a href="#cb51-320" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-321"><a href="#cb51-321" aria-hidden="true" tabindex="-1"></a>To get that probability, we&#39;ll divide the counts of trigrams by the count of bigrams.</span>
-<span id="cb51-322"><a href="#cb51-322" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-323"><a href="#cb51-323" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb51-324"><a href="#cb51-324" aria-hidden="true" tabindex="-1"></a>P(w_k|w_i,w_j) = \frac{C(w_i, w_j, w_k)}{C(w_i, w_j)}</span>
-<span id="cb51-325"><a href="#cb51-325" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb51-326"><a href="#cb51-326" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-327"><a href="#cb51-327" aria-hidden="true" tabindex="-1"></a>To do that, I&#39;ll create a bigram count data frame, a trigram count dataframe, and join them.</span>
-<span id="cb51-328"><a href="#cb51-328" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-331"><a href="#cb51-331" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-332"><a href="#cb51-332" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: bigram_count</span></span>
-<span id="cb51-333"><a href="#cb51-333" aria-hidden="true" tabindex="-1"></a>trigrams <span class="sc">%&gt;%</span></span>
-<span id="cb51-334"><a href="#cb51-334" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb51-335"><a href="#cb51-335" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(word_i, word_j) <span class="sc">%&gt;%</span></span>
-<span id="cb51-336"><a href="#cb51-336" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">bigram_count =</span> n)<span class="ot">-&gt;</span> bigram_count</span>
-<span id="cb51-337"><a href="#cb51-337" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-338"><a href="#cb51-338" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-341"><a href="#cb51-341" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-342"><a href="#cb51-342" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: trigram_count</span></span>
-<span id="cb51-343"><a href="#cb51-343" aria-hidden="true" tabindex="-1"></a>trigrams <span class="sc">%&gt;%</span></span>
-<span id="cb51-344"><a href="#cb51-344" aria-hidden="true" tabindex="-1"></a> <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb51-345"><a href="#cb51-345" aria-hidden="true" tabindex="-1"></a> <span class="fu">count</span>(word_i, word_j, word_k, dir) <span class="sc">%&gt;%</span></span>
-<span id="cb51-346"><a href="#cb51-346" aria-hidden="true" tabindex="-1"></a> <span class="fu">rename</span>(<span class="at">trigram_count =</span> n) <span class="ot">-&gt;</span> trigram_count</span>
-<span id="cb51-347"><a href="#cb51-347" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-348"><a href="#cb51-348" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-351"><a href="#cb51-351" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-352"><a href="#cb51-352" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: model</span></span>
-<span id="cb51-353"><a href="#cb51-353" aria-hidden="true" tabindex="-1"></a>trigram_count <span class="sc">%&gt;%</span></span>
-<span id="cb51-354"><a href="#cb51-354" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(bigram_count) <span class="sc">%&gt;%</span></span>
-<span id="cb51-355"><a href="#cb51-355" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cond_prob =</span> trigram_count<span class="sc">/</span>bigram_count)<span class="ot">-&gt;</span>model</span>
-<span id="cb51-356"><a href="#cb51-356" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-357"><a href="#cb51-357" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-358"><a href="#cb51-358" aria-hidden="true" tabindex="-1"></a><span class="fu">## Mockup of Generator</span></span>
-<span id="cb51-359"><a href="#cb51-359" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-360"><a href="#cb51-360" aria-hidden="true" tabindex="-1"></a>Generating continuer from the data.</span>
-<span id="cb51-361"><a href="#cb51-361" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-364"><a href="#cb51-364" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-365"><a href="#cb51-365" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: gen_1</span></span>
-<span id="cb51-366"><a href="#cb51-366" aria-hidden="true" tabindex="-1"></a>model <span class="sc">%&gt;%</span></span>
-<span id="cb51-367"><a href="#cb51-367" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(word_i <span class="sc">==</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, word_j <span class="sc">==</span> <span class="st">&quot;&lt;s&gt;&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb51-368"><a href="#cb51-368" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_n</span>(<span class="at">size =</span> <span class="dv">1</span>, <span class="at">weight =</span> cond_prob)</span>
-<span id="cb51-369"><a href="#cb51-369" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-370"><a href="#cb51-370" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-371"><a href="#cb51-371" aria-hidden="true" tabindex="-1"></a>The actual site will generate comments using javascript, but this is a mockup to explore what&#39;s necessary.</span>
-<span id="cb51-372"><a href="#cb51-372" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-375"><a href="#cb51-375" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-376"><a href="#cb51-376" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: generate_fun</span></span>
-<span id="cb51-377"><a href="#cb51-377" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; generate a sequence from a trigram model df</span></span>
-<span id="cb51-378"><a href="#cb51-378" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; </span></span>
-<span id="cb51-379"><a href="#cb51-379" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param df The data frame containing the trigram model</span></span>
-<span id="cb51-380"><a href="#cb51-380" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param w_i The n-2th word</span></span>
-<span id="cb51-381"><a href="#cb51-381" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param w_j The n-1th word</span></span>
-<span id="cb51-382"><a href="#cb51-382" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param max a max length of a comment</span></span>
-<span id="cb51-383"><a href="#cb51-383" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; </span></span>
-<span id="cb51-384"><a href="#cb51-384" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @returns A concatenated comment string</span></span>
-<span id="cb51-385"><a href="#cb51-385" aria-hidden="true" tabindex="-1"></a>generate <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">w_i =</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, <span class="at">w_j =</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, <span class="at">max =</span> <span class="dv">10000</span>){</span>
-<span id="cb51-386"><a href="#cb51-386" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">vector</span>()</span>
-<span id="cb51-387"><a href="#cb51-387" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">=</span> <span class="dv">0</span></span>
-<span id="cb51-388"><a href="#cb51-388" aria-hidden="true" tabindex="-1"></a>  stop <span class="ot">=</span> <span class="cn">FALSE</span></span>
-<span id="cb51-389"><a href="#cb51-389" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(x <span class="sc">&lt;</span> max <span class="sc">&amp;</span> <span class="sc">!</span>stop){</span>
-<span id="cb51-390"><a href="#cb51-390" aria-hidden="true" tabindex="-1"></a>    sample <span class="ot">=</span> df <span class="sc">%&gt;%</span> </span>
-<span id="cb51-391"><a href="#cb51-391" aria-hidden="true" tabindex="-1"></a>                <span class="fu">filter</span>(word_i <span class="sc">==</span> w_i, word_j <span class="sc">==</span> w_j) <span class="sc">%&gt;%</span> </span>
-<span id="cb51-392"><a href="#cb51-392" aria-hidden="true" tabindex="-1"></a>                <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">weight_by =</span> cond_prob)</span>
-<span id="cb51-393"><a href="#cb51-393" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(sample<span class="sc">$</span>word_k <span class="sc">==</span> <span class="st">&quot;&lt;/s&gt;&quot;</span>) {</span>
-<span id="cb51-394"><a href="#cb51-394" aria-hidden="true" tabindex="-1"></a>      stop <span class="ot">=</span> <span class="cn">TRUE</span></span>
-<span id="cb51-395"><a href="#cb51-395" aria-hidden="true" tabindex="-1"></a>      <span class="cf">break</span></span>
-<span id="cb51-396"><a href="#cb51-396" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb51-397"><a href="#cb51-397" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(out) <span class="sc">==</span> <span class="dv">0</span>){</span>
-<span id="cb51-398"><a href="#cb51-398" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> <span class="fu">str_to_title</span>(sample<span class="sc">$</span>word_k)</span>
-<span id="cb51-399"><a href="#cb51-399" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span> <span class="cf">if</span> (w_j <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;.&quot;</span>, <span class="st">&quot;?&quot;</span>, <span class="st">&quot;!&quot;</span>)){</span>
-<span id="cb51-400"><a href="#cb51-400" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> <span class="fu">str_to_title</span>(sample<span class="sc">$</span>word_k)</span>
-<span id="cb51-401"><a href="#cb51-401" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
-<span id="cb51-402"><a href="#cb51-402" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> sample<span class="sc">$</span>word_k</span>
-<span id="cb51-403"><a href="#cb51-403" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb51-404"><a href="#cb51-404" aria-hidden="true" tabindex="-1"></a>    left_side <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb51-405"><a href="#cb51-405" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(out) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
-<span id="cb51-406"><a href="#cb51-406" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(<span class="fu">rev</span>(out)[<span class="dv">1</span>] <span class="sc">==</span> <span class="st">&quot;&quot;</span>){</span>
-<span id="cb51-407"><a href="#cb51-407" aria-hidden="true" tabindex="-1"></a>        left_side <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb51-408"><a href="#cb51-408" aria-hidden="true" tabindex="-1"></a>      }<span class="cf">else</span> <span class="cf">if</span>(<span class="fu">str_detect</span>(sample<span class="sc">$</span>dir, <span class="st">&quot;&lt;&quot;</span>)){</span>
-<span id="cb51-409"><a href="#cb51-409" aria-hidden="true" tabindex="-1"></a>        left_side <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb51-410"><a href="#cb51-410" aria-hidden="true" tabindex="-1"></a>      }<span class="cf">else</span>{</span>
-<span id="cb51-411"><a href="#cb51-411" aria-hidden="true" tabindex="-1"></a>        left_side <span class="ot">&lt;-</span> <span class="st">&quot; &quot;</span></span>
-<span id="cb51-412"><a href="#cb51-412" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb51-413"><a href="#cb51-413" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb51-414"><a href="#cb51-414" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">str_detect</span>(sample<span class="sc">$</span>dir, <span class="st">&quot;&gt;&quot;</span>)){</span>
-<span id="cb51-415"><a href="#cb51-415" aria-hidden="true" tabindex="-1"></a>      right_side <span class="ot">&lt;-</span> <span class="st">&quot;&quot;</span></span>
-<span id="cb51-416"><a href="#cb51-416" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
-<span id="cb51-417"><a href="#cb51-417" aria-hidden="true" tabindex="-1"></a>      right_side <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb51-418"><a href="#cb51-418" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb51-419"><a href="#cb51-419" aria-hidden="true" tabindex="-1"></a>    out <span class="ot">&lt;-</span> <span class="fu">c</span>(out, left_side, paste_word, right_side)</span>
-<span id="cb51-420"><a href="#cb51-420" aria-hidden="true" tabindex="-1"></a>    w_i <span class="ot">=</span> w_j</span>
-<span id="cb51-421"><a href="#cb51-421" aria-hidden="true" tabindex="-1"></a>    w_j <span class="ot">=</span> sample<span class="sc">$</span>word_k</span>
-<span id="cb51-422"><a href="#cb51-422" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">=</span> x<span class="sc">+</span><span class="dv">1</span></span>
-<span id="cb51-423"><a href="#cb51-423" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb51-424"><a href="#cb51-424" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">str_c</span>(out, <span class="at">collapse =</span> <span class="st">&quot;&quot;</span>))</span>
-<span id="cb51-425"><a href="#cb51-425" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb51-426"><a href="#cb51-426" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-427"><a href="#cb51-427" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-430"><a href="#cb51-430" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-431"><a href="#cb51-431" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: sample_gen</span></span>
-<span id="cb51-432"><a href="#cb51-432" aria-hidden="true" tabindex="-1"></a><span class="fu">generate</span>(model)</span>
-<span id="cb51-433"><a href="#cb51-433" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-434"><a href="#cb51-434" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-435"><a href="#cb51-435" aria-hidden="true" tabindex="-1"></a><span class="fu">## Prepare model for json</span></span>
-<span id="cb51-436"><a href="#cb51-436" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-437"><a href="#cb51-437" aria-hidden="true" tabindex="-1"></a>The model needs to be re-represented as a json file to be processed for the site. We decided on the schema</span>
-<span id="cb51-438"><a href="#cb51-438" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-439"><a href="#cb51-439" aria-hidden="true" tabindex="-1"></a><span class="in">``` {.json filename=&quot;model_schema.json&quot;}</span></span>
-<span id="cb51-440"><a href="#cb51-440" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb51-441"><a href="#cb51-441" aria-hidden="true" tabindex="-1"></a>  <span class="dt">w_i</span> <span class="op">:</span> {</span>
-<span id="cb51-442"><a href="#cb51-442" aria-hidden="true" tabindex="-1"></a>    <span class="dt">w_j</span> <span class="op">:</span> {</span>
-<span id="cb51-443"><a href="#cb51-443" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;next_word&quot;</span><span class="op">:</span> [string<span class="op">,</span> string<span class="op">,</span> string<span class="op">,</span> <span class="op">...</span>]<span class="op">,</span></span>
-<span id="cb51-444"><a href="#cb51-444" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;sum_prob&quot;</span><span class="op">:</span> [float<span class="op">,</span> float float<span class="op">,</span> <span class="op">...</span>]<span class="op">,</span></span>
-<span id="cb51-445"><a href="#cb51-445" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;cond_prob&quot;</span><span class="op">:</span> [float<span class="op">,</span> float<span class="op">,</span> float<span class="op">,</span> <span class="op">...</span>]<span class="op">,</span></span>
-<span id="cb51-446"><a href="#cb51-446" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;lean&quot;</span><span class="op">:</span> [string<span class="op">,</span> string<span class="op">,</span> string<span class="op">,</span> <span class="op">...</span>]</span>
-<span id="cb51-447"><a href="#cb51-447" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb51-448"><a href="#cb51-448" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb51-449"><a href="#cb51-449" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb51-450"><a href="#cb51-450" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-451"><a href="#cb51-451" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-454"><a href="#cb51-454" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-455"><a href="#cb51-455" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: pre_probs</span></span>
-<span id="cb51-456"><a href="#cb51-456" aria-hidden="true" tabindex="-1"></a>model <span class="sc">%&gt;%</span></span>
-<span id="cb51-457"><a href="#cb51-457" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_i, word_j) <span class="sc">%&gt;%</span></span>
-<span id="cb51-458"><a href="#cb51-458" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(cond_prob) <span class="sc">%&gt;%</span></span>
-<span id="cb51-459"><a href="#cb51-459" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sum_prob =</span> <span class="fu">cumsum</span>(cond_prob)) <span class="ot">-&gt;</span>model_prep</span>
-<span id="cb51-460"><a href="#cb51-460" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-461"><a href="#cb51-461" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-464"><a href="#cb51-464" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-465"><a href="#cb51-465" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: empty_list</span></span>
-<span id="cb51-466"><a href="#cb51-466" aria-hidden="true" tabindex="-1"></a>outer_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb51-467"><a href="#cb51-467" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-468"><a href="#cb51-468" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-471"><a href="#cb51-471" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-472"><a href="#cb51-472" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: nest_model</span></span>
-<span id="cb51-473"><a href="#cb51-473" aria-hidden="true" tabindex="-1"></a>model_prep <span class="sc">%&gt;%</span></span>
-<span id="cb51-474"><a href="#cb51-474" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_i, word_j) <span class="sc">%&gt;%</span></span>
-<span id="cb51-475"><a href="#cb51-475" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb51-476"><a href="#cb51-476" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_i) <span class="sc">%&gt;%</span></span>
-<span id="cb51-477"><a href="#cb51-477" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="ot">-&gt;</span> all_nest</span>
-<span id="cb51-478"><a href="#cb51-478" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-479"><a href="#cb51-479" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-482"><a href="#cb51-482" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-483"><a href="#cb51-483" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: nest_to_list</span></span>
-<span id="cb51-484"><a href="#cb51-484" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_along</span>(all_nest<span class="sc">$</span>word_i)){</span>
-<span id="cb51-485"><a href="#cb51-485" aria-hidden="true" tabindex="-1"></a>  w_i <span class="ot">&lt;-</span> all_nest<span class="sc">$</span>word_i[i]</span>
-<span id="cb51-486"><a href="#cb51-486" aria-hidden="true" tabindex="-1"></a>  outer_list[[w_i]] <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb51-487"><a href="#cb51-487" aria-hidden="true" tabindex="-1"></a>  inner_j <span class="ot">&lt;-</span> all_nest<span class="sc">$</span>data[[i]]</span>
-<span id="cb51-488"><a href="#cb51-488" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="fu">seq_along</span>(inner_j<span class="sc">$</span>word_j)){</span>
-<span id="cb51-489"><a href="#cb51-489" aria-hidden="true" tabindex="-1"></a>    w_j <span class="ot">&lt;-</span> inner_j<span class="sc">$</span>word_j[j]</span>
-<span id="cb51-490"><a href="#cb51-490" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]] <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb51-491"><a href="#cb51-491" aria-hidden="true" tabindex="-1"></a>    inner_k <span class="ot">&lt;-</span> inner_j<span class="sc">$</span>data[[j]]</span>
-<span id="cb51-492"><a href="#cb51-492" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb51-493"><a href="#cb51-493" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;next_word&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>word_k</span>
-<span id="cb51-494"><a href="#cb51-494" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;sum_prob&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>sum_prob</span>
-<span id="cb51-495"><a href="#cb51-495" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;cond_prob&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>cond_prob</span>
-<span id="cb51-496"><a href="#cb51-496" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;lean&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>dir</span>
-<span id="cb51-497"><a href="#cb51-497" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb51-498"><a href="#cb51-498" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb51-499"><a href="#cb51-499" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-500"><a href="#cb51-500" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-503"><a href="#cb51-503" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-504"><a href="#cb51-504" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: convert_list_to_json</span></span>
-<span id="cb51-505"><a href="#cb51-505" aria-hidden="true" tabindex="-1"></a>jsonData <span class="ot">&lt;-</span> <span class="fu">toJSON</span>(outer_list, <span class="at">indent =</span> <span class="dv">2</span>)</span>
-<span id="cb51-506"><a href="#cb51-506" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb51-507"><a href="#cb51-507" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-510"><a href="#cb51-510" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb51-511"><a href="#cb51-511" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb51-512"><a href="#cb51-512" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: write_json_file</span></span>
-<span id="cb51-513"><a href="#cb51-513" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(jsonData, <span class="at">file =</span> <span class="st">&quot;../data/model.json&quot;</span>)</span>
-<span id="cb51-514"><a href="#cb51-514" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<div class="sourceCode" id="cb54" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> &quot;3gram Model&quot;</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> &quot;Josef Fruehwald&quot;</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> today</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span><span class="co"> visual</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a><span class="an">license:</span><span class="co"> MIT</span></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a><span class="co">    embed-resources: true</span></span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a><span class="co">    theme: darkly</span></span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a><span class="an">code-tools:</span><span class="co"> true</span></span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Setup</span></span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a>I&#39;m going to try to keep the install size small, so rather than installing the whole tidyverse metapackage, I&#39;ll just install the specific libraries I use.</span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>Requires <span class="in">`renv`</span> and <span class="in">`reticulate`</span>.</span>
+<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: install</span></span>
+<span id="cb54-24"><a href="#cb54-24" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb54-25"><a href="#cb54-25" aria-hidden="true" tabindex="-1"></a><span class="co"># ensure renv is activated</span></span>
+<span id="cb54-26"><a href="#cb54-26" aria-hidden="true" tabindex="-1"></a><span class="co"># source(&quot;.Rprofile)</span></span>
+<span id="cb54-27"><a href="#cb54-27" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">refresh</span>()</span>
+<span id="cb54-28"><a href="#cb54-28" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-29"><a href="#cb54-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-32"><a href="#cb54-32" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-33"><a href="#cb54-33" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: main_libraries</span></span>
+<span id="cb54-34"><a href="#cb54-34" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb54-35"><a href="#cb54-35" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb54-36"><a href="#cb54-36" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb54-37"><a href="#cb54-37" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
+<span id="cb54-38"><a href="#cb54-38" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb54-39"><a href="#cb54-39" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rjson)</span>
+<span id="cb54-40"><a href="#cb54-40" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-41"><a href="#cb54-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-44"><a href="#cb54-44" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-45"><a href="#cb54-45" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: spacyr</span></span>
+<span id="cb54-46"><a href="#cb54-46" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(spacyr)</span>
+<span id="cb54-47"><a href="#cb54-47" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-48"><a href="#cb54-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-49"><a href="#cb54-49" aria-hidden="true" tabindex="-1"></a>I had to sidestep <span class="in">`spacyr`</span>&#39;s approach to installing and downloading spaCy and its language models, but I found I could sidestep it by directly installing spacy and its language models into the conda environment <span class="in">`spacyr`</span> expects.</span>
+<span id="cb54-50"><a href="#cb54-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-53"><a href="#cb54-53" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
+<span id="cb54-54"><a href="#cb54-54" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb54-55"><a href="#cb54-55" aria-hidden="true" tabindex="-1"></a><span class="co">#| filename: &quot;spacy_install.sh&quot;</span></span>
+<span id="cb54-56"><a href="#cb54-56" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">--yes</span> <span class="at">--name</span> spacy_condaenv python=3.8 spacy <span class="at">-c</span> conda-forge</span>
+<span id="cb54-57"><a href="#cb54-57" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate spacy_condaenv</span>
+<span id="cb54-58"><a href="#cb54-58" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> spacy download en_core_web_trf</span>
+<span id="cb54-59"><a href="#cb54-59" aria-hidden="true" tabindex="-1"></a><span class="co"># fallback</span></span>
+<span id="cb54-60"><a href="#cb54-60" aria-hidden="true" tabindex="-1"></a><span class="co"># python -m spacy download en_core_web_sm</span></span>
+<span id="cb54-61"><a href="#cb54-61" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-62"><a href="#cb54-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-65"><a href="#cb54-65" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-66"><a href="#cb54-66" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb54-67"><a href="#cb54-67" aria-hidden="true" tabindex="-1"></a><span class="fu">spacy_install</span>(<span class="at">lang_models =</span> <span class="st">&quot;en_core_web_trf&quot;</span>)</span>
+<span id="cb54-68"><a href="#cb54-68" aria-hidden="true" tabindex="-1"></a><span class="co"># fallback</span></span>
+<span id="cb54-69"><a href="#cb54-69" aria-hidden="true" tabindex="-1"></a><span class="co"># spacy_install(lang_models = &quot;en_core_web_sm&quot;)</span></span>
+<span id="cb54-70"><a href="#cb54-70" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-71"><a href="#cb54-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-74"><a href="#cb54-74" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-75"><a href="#cb54-75" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: initialize_model</span></span>
+<span id="cb54-76"><a href="#cb54-76" aria-hidden="true" tabindex="-1"></a><span class="fu">spacy_initialize</span>(<span class="at">model =</span> <span class="st">&quot;en_core_web_trf&quot;</span>)</span>
+<span id="cb54-77"><a href="#cb54-77" aria-hidden="true" tabindex="-1"></a><span class="co"># fallback</span></span>
+<span id="cb54-78"><a href="#cb54-78" aria-hidden="true" tabindex="-1"></a><span class="co"># spacy_initialize(model = &quot;en_core_web_sm)</span></span>
+<span id="cb54-79"><a href="#cb54-79" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-80"><a href="#cb54-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-81"><a href="#cb54-81" aria-hidden="true" tabindex="-1"></a><span class="fu">## Load Raw Data</span></span>
+<span id="cb54-82"><a href="#cb54-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-85"><a href="#cb54-85" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-86"><a href="#cb54-86" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: raw_data_read</span></span>
+<span id="cb54-87"><a href="#cb54-87" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;../data/Codes Summed-Main View.csv&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb54-88"><a href="#cb54-88" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rename_with</span>(<span class="sc">~</span><span class="fu">tolower</span>(<span class="fu">gsub</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">s&quot;</span>, <span class="st">&quot;_&quot;</span>, .x)))</span>
+<span id="cb54-89"><a href="#cb54-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-90"><a href="#cb54-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-91"><a href="#cb54-91" aria-hidden="true" tabindex="-1"></a>Checking to ensure there is a unique value of <span class="in">`Response`</span> for every row.</span>
+<span id="cb54-92"><a href="#cb54-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-95"><a href="#cb54-95" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-96"><a href="#cb54-96" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: quality_check</span></span>
+<span id="cb54-97"><a href="#cb54-97" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(dat) <span class="sc">==</span> <span class="fu">length</span>(<span class="fu">unique</span>(dat<span class="sc">$</span>response))</span>
+<span id="cb54-98"><a href="#cb54-98" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(dat)</span>
+<span id="cb54-99"><a href="#cb54-99" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-100"><a href="#cb54-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-101"><a href="#cb54-101" aria-hidden="true" tabindex="-1"></a>Focusing in on the qualitative comments.</span>
+<span id="cb54-102"><a href="#cb54-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-105"><a href="#cb54-105" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-106"><a href="#cb54-106" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: corpus_focus</span></span>
+<span id="cb54-107"><a href="#cb54-107" aria-hidden="true" tabindex="-1"></a>dat <span class="sc">%&gt;%</span></span>
+<span id="cb54-108"><a href="#cb54-108" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(response, qualitative_response) <span class="sc">%&gt;%</span></span>
+<span id="cb54-109"><a href="#cb54-109" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">qualitative_response =</span> <span class="fu">str_replace_all</span>(qualitative_response, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">s+&quot;</span>, <span class="st">&quot; &quot;</span>))<span class="ot">-&gt;</span> corpus</span>
+<span id="cb54-110"><a href="#cb54-110" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-111"><a href="#cb54-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-112"><a href="#cb54-112" aria-hidden="true" tabindex="-1"></a><span class="fu">## Processing</span></span>
+<span id="cb54-113"><a href="#cb54-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-114"><a href="#cb54-114" aria-hidden="true" tabindex="-1"></a><span class="fu">### spaCy Parse</span></span>
+<span id="cb54-115"><a href="#cb54-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-116"><a href="#cb54-116" aria-hidden="true" tabindex="-1"></a>Using spacy&#39;s models to tokenize the comments and annotate part of speech and entity tags.</span>
+<span id="cb54-117"><a href="#cb54-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-120"><a href="#cb54-120" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-121"><a href="#cb54-121" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: spacy_parse</span></span>
+<span id="cb54-122"><a href="#cb54-122" aria-hidden="true" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">TOKENIZERS_PARALLELISM=</span><span class="st">&quot;false&quot;</span>)</span>
+<span id="cb54-123"><a href="#cb54-123" aria-hidden="true" tabindex="-1"></a>comment_parse <span class="ot">&lt;-</span> <span class="fu">spacy_parse</span>(corpus<span class="sc">$</span>qualitative_response)</span>
+<span id="cb54-124"><a href="#cb54-124" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-125"><a href="#cb54-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-126"><a href="#cb54-126" aria-hidden="true" tabindex="-1"></a><span class="fu">### Define padding function</span></span>
+<span id="cb54-127"><a href="#cb54-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-128"><a href="#cb54-128" aria-hidden="true" tabindex="-1"></a><span class="in">`pad_df()`</span> will add sequence start and end padding.</span>
+<span id="cb54-129"><a href="#cb54-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-132"><a href="#cb54-132" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-133"><a href="#cb54-133" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: def_pad_df</span></span>
+<span id="cb54-134"><a href="#cb54-134" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; Pad comments for ngram</span></span>
+<span id="cb54-135"><a href="#cb54-135" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; </span></span>
+<span id="cb54-136"><a href="#cb54-136" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; Function expects a data frame output from \code{spacy_parse()} that has had its</span></span>
+<span id="cb54-137"><a href="#cb54-137" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; entities consolidated</span></span>
+<span id="cb54-138"><a href="#cb54-138" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; </span></span>
+<span id="cb54-139"><a href="#cb54-139" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param df a df outpuyt from \code{spacy_parse()}</span></span>
+<span id="cb54-140"><a href="#cb54-140" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param n the pad size (should be ngram size minus one)</span></span>
+<span id="cb54-141"><a href="#cb54-141" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @start_symbol the start of sequence symbol</span></span>
+<span id="cb54-142"><a href="#cb54-142" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @end_symbol the end of sequence symbol</span></span>
+<span id="cb54-143"><a href="#cb54-143" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; </span></span>
+<span id="cb54-144"><a href="#cb54-144" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @returns The same df, but padded out with \code{start_symbok} and \code{end_symbol}</span></span>
+<span id="cb54-145"><a href="#cb54-145" aria-hidden="true" tabindex="-1"></a>pad_df <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">n =</span> <span class="dv">2</span>, <span class="at">start_symbol =</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, <span class="at">end_symbol =</span> <span class="st">&quot;&lt;/s&gt;&quot;</span>){</span>
+<span id="cb54-146"><a href="#cb54-146" aria-hidden="true" tabindex="-1"></a>  start_pad <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">token =</span> <span class="fu">rep</span>(start_symbol, <span class="at">times =</span> n))</span>
+<span id="cb54-147"><a href="#cb54-147" aria-hidden="true" tabindex="-1"></a>  end_pad <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">token =</span> <span class="fu">rep</span>(end_symbol, <span class="at">times =</span> n))</span>
+<span id="cb54-148"><a href="#cb54-148" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(start_pad, df, end_pad) <span class="sc">%&gt;%</span></span>
+<span id="cb54-149"><a href="#cb54-149" aria-hidden="true" tabindex="-1"></a>          <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">sentence_id =</span> <span class="dv">0</span>, <span class="at">token_id =</span> <span class="dv">0</span>, <span class="at">pos =</span> <span class="st">&#39;&#39;</span>, </span>
+<span id="cb54-150"><a href="#cb54-150" aria-hidden="true" tabindex="-1"></a>                          <span class="at">entity_type =</span> <span class="st">&#39;&#39;</span>, <span class="at">dir =</span> <span class="st">&#39;&#39;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb54-151"><a href="#cb54-151" aria-hidden="true" tabindex="-1"></a>          <span class="fu">mutate</span>(<span class="at">lemma =</span> token)</span>
+<span id="cb54-152"><a href="#cb54-152" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(out)</span>
+<span id="cb54-153"><a href="#cb54-153" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb54-154"><a href="#cb54-154" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-155"><a href="#cb54-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-156"><a href="#cb54-156" aria-hidden="true" tabindex="-1"></a><span class="fu">### Text normalization</span></span>
+<span id="cb54-157"><a href="#cb54-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-158"><a href="#cb54-158" aria-hidden="true" tabindex="-1"></a>Only certain consolidated entities should be title cased.</span>
+<span id="cb54-159"><a href="#cb54-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-162"><a href="#cb54-162" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-163"><a href="#cb54-163" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: def_titlecase</span></span>
+<span id="cb54-164"><a href="#cb54-164" aria-hidden="true" tabindex="-1"></a>types_to_titlecase <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;EVENT&quot;</span>, <span class="st">&quot;FAC&quot;</span>, <span class="st">&quot;GPE&quot;</span>, <span class="st">&quot;LANGUAGE&quot;</span>, <span class="st">&quot;LAW&quot;</span>, <span class="st">&quot;LOC&quot;</span>, <span class="st">&quot;NORP&quot;</span>,</span>
+<span id="cb54-165"><a href="#cb54-165" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;ORG&quot;</span>, <span class="st">&quot;PERSON&quot;</span>, <span class="st">&quot;PRODUCT&quot;</span>, <span class="st">&quot;WORK_OF_ART&quot;</span>)</span>
+<span id="cb54-166"><a href="#cb54-166" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-167"><a href="#cb54-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-168"><a href="#cb54-168" aria-hidden="true" tabindex="-1"></a>Here we normalize certain street name abbreviations so that they&#39;ll be counted up as a single type. Otherwise <span class="in">`&quot;Nicholasville Road&quot;`</span>, <span class="in">`&quot;Nicholasville Rd&quot;`</span>, and <span class="in">`&quot;Nicholasville rd&quot;`</span> would have all gotten different probability distributions.</span>
+<span id="cb54-169"><a href="#cb54-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-170"><a href="#cb54-170" aria-hidden="true" tabindex="-1"></a>Additionally, multiple spellings, spacings, and capitalizations of the transit system, Lextran, were normalized to <span class="in">`&quot;Lextran&quot;`</span>. Examples I saw included</span>
+<span id="cb54-171"><a href="#cb54-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-172"><a href="#cb54-172" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`lextran`</span></span>
+<span id="cb54-173"><a href="#cb54-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-174"><a href="#cb54-174" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`Lextran`</span></span>
+<span id="cb54-175"><a href="#cb54-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-176"><a href="#cb54-176" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`LEXTRAN`</span></span>
+<span id="cb54-177"><a href="#cb54-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-178"><a href="#cb54-178" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`Lex Tran`</span></span>
+<span id="cb54-179"><a href="#cb54-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-180"><a href="#cb54-180" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`LexTran`</span></span>
+<span id="cb54-181"><a href="#cb54-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-182"><a href="#cb54-182" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`Lex-tran`</span></span>
+<span id="cb54-183"><a href="#cb54-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-186"><a href="#cb54-186" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-187"><a href="#cb54-187" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: normalize_and_pad</span></span>
+<span id="cb54-188"><a href="#cb54-188" aria-hidden="true" tabindex="-1"></a>comment_parse <span class="sc">%&gt;%</span></span>
+<span id="cb54-189"><a href="#cb54-189" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">token =</span> <span class="fu">case_when</span>(entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;Ave&quot;</span> <span class="sc">~</span> <span class="st">&quot;Avenue&quot;</span>,</span>
+<span id="cb54-190"><a href="#cb54-190" aria-hidden="true" tabindex="-1"></a>                           entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;Pkwy&quot;</span> <span class="sc">~</span> <span class="st">&quot;Parkway&quot;</span>,</span>
+<span id="cb54-191"><a href="#cb54-191" aria-hidden="true" tabindex="-1"></a>                           entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;Rd&quot;</span> <span class="sc">~</span> <span class="st">&quot;Road&quot;</span>,</span>
+<span id="cb54-192"><a href="#cb54-192" aria-hidden="true" tabindex="-1"></a>                           entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;rd&quot;</span> <span class="sc">~</span> <span class="st">&quot;Road&quot;</span>,</span>
+<span id="cb54-193"><a href="#cb54-193" aria-hidden="true" tabindex="-1"></a>                           entity <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> token <span class="sc">==</span> <span class="st">&quot;St.&quot;</span> <span class="sc">~</span> <span class="st">&quot;Street&quot;</span> ,</span>
+<span id="cb54-194"><a href="#cb54-194" aria-hidden="true" tabindex="-1"></a>                           <span class="cn">TRUE</span> <span class="sc">~</span> token)) <span class="sc">%&gt;%</span></span>
+<span id="cb54-195"><a href="#cb54-195" aria-hidden="true" tabindex="-1"></a>  <span class="fu">entity_consolidate</span>(<span class="at">concatenator =</span> <span class="st">&quot; &quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb54-196"><a href="#cb54-196" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">token =</span> <span class="fu">case_when</span>(entity_type <span class="sc">!=</span> <span class="st">&#39;&#39;</span> <span class="sc">&amp;</span> </span>
+<span id="cb54-197"><a href="#cb54-197" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">str_detect</span>(token, </span>
+<span id="cb54-198"><a href="#cb54-198" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">&quot;^[Ll][Ee][Xx]</span><span class="sc">\\</span><span class="st">W*[Tt][Rr][Aa][Nn]$&quot;</span>) <span class="sc">~</span> <span class="st">&quot;Lextran&quot;</span>,</span>
+<span id="cb54-199"><a href="#cb54-199" aria-hidden="true" tabindex="-1"></a>                           entity_type <span class="sc">%in%</span> types_to_titlecase <span class="sc">&amp;</span></span>
+<span id="cb54-200"><a href="#cb54-200" aria-hidden="true" tabindex="-1"></a>                             <span class="sc">!</span><span class="fu">str_detect</span>(token, <span class="st">&quot;^[:upper:]+$&quot;</span>) <span class="sc">~</span> <span class="fu">str_to_title</span>(token),</span>
+<span id="cb54-201"><a href="#cb54-201" aria-hidden="true" tabindex="-1"></a>                           pos <span class="sc">==</span> <span class="st">&quot;PRON&quot;</span> <span class="sc">&amp;</span> <span class="fu">str_detect</span>(token, <span class="st">&quot;^[Ii]$&quot;</span>) <span class="sc">~</span> <span class="st">&quot;I&quot;</span>,</span>
+<span id="cb54-202"><a href="#cb54-202" aria-hidden="true" tabindex="-1"></a>                           <span class="cn">TRUE</span> <span class="sc">~</span> <span class="fu">tolower</span>(token)))<span class="ot">-&gt;</span>consolidated</span>
+<span id="cb54-203"><a href="#cb54-203" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-204"><a href="#cb54-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-205"><a href="#cb54-205" aria-hidden="true" tabindex="-1"></a><span class="fu">### Coding of &quot;leaners&quot;</span></span>
+<span id="cb54-206"><a href="#cb54-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-207"><a href="#cb54-207" aria-hidden="true" tabindex="-1"></a>Certain tokens are &quot;leaners&quot;. Some tokens lean left, and should have no whitespace between them and the previous token with detokenied:</span>
+<span id="cb54-208"><a href="#cb54-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-209"><a href="#cb54-209" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`&quot;also&quot;`</span> <span class="in">`&quot;,&quot;`</span> (leans left) -<span class="sc">\&gt;</span> <span class="in">`&quot;also,&quot;`</span></span>
+<span id="cb54-210"><a href="#cb54-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-211"><a href="#cb54-211" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`&quot;I&quot;`</span> <span class="in">`&quot;&#39;m&quot;`</span> (leans left) -<span class="sc">\&gt;</span> <span class="in">`&quot;I&#39;m&quot;`</span></span>
+<span id="cb54-212"><a href="#cb54-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-213"><a href="#cb54-213" aria-hidden="true" tabindex="-1"></a>Some tokens lean right, and should have no whitespace with the following token</span>
+<span id="cb54-214"><a href="#cb54-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-215"><a href="#cb54-215" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`&quot;(&quot;`</span> <span class="in">`&quot;incidentally&quot;`</span> (leans right) -<span class="sc">\&gt;</span> <span class="in">`&quot;(incidentally&quot;`</span></span>
+<span id="cb54-216"><a href="#cb54-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-217"><a href="#cb54-217" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`&quot;“&quot;`</span> <span class="in">`&quot;so-called&quot;`</span> (leans right) -<span class="sc">\&gt;</span> <span class="in">`&quot;“so-called&quot;`</span></span>
+<span id="cb54-218"><a href="#cb54-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-219"><a href="#cb54-219" aria-hidden="true" tabindex="-1"></a>Some tokens lean left *and* right, and should have no whitespace in either direction when detokenized</span>
+<span id="cb54-220"><a href="#cb54-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-221"><a href="#cb54-221" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="in">`&quot;and&quot;`</span> <span class="in">`&quot;/&quot;`</span> <span class="in">`&quot;or&quot;`</span> (leans both ways) -<span class="sc">\&gt;</span> <span class="in">`&quot;and/or&quot;`</span></span>
+<span id="cb54-222"><a href="#cb54-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-223"><a href="#cb54-223" aria-hidden="true" tabindex="-1"></a>These were hand coded based on the tokens that appeared in the corpus, so I don&#39;t re-reun these blocks afterwards to prevent overwriting the hand coding.</span>
+<span id="cb54-224"><a href="#cb54-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-227"><a href="#cb54-227" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-228"><a href="#cb54-228" aria-hidden="true" tabindex="-1"></a><span class="co"># consolidated %&gt;%</span></span>
+<span id="cb54-229"><a href="#cb54-229" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(str_detect(token, &quot;&#39;\\w+?&quot;)) %&gt;%</span></span>
+<span id="cb54-230"><a href="#cb54-230" aria-hidden="true" tabindex="-1"></a><span class="co">#   count(token) %&gt;%</span></span>
+<span id="cb54-231"><a href="#cb54-231" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(desc(n)) %&gt;%</span></span>
+<span id="cb54-232"><a href="#cb54-232" aria-hidden="true" tabindex="-1"></a><span class="co">#   slice(1:7) %&gt;%</span></span>
+<span id="cb54-233"><a href="#cb54-233" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(-n) %&gt;%</span></span>
+<span id="cb54-234"><a href="#cb54-234" aria-hidden="true" tabindex="-1"></a><span class="co">#   write_csv(file = &quot;../data/00_leaners.csv&quot;)</span></span>
+<span id="cb54-235"><a href="#cb54-235" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-236"><a href="#cb54-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-239"><a href="#cb54-239" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-240"><a href="#cb54-240" aria-hidden="true" tabindex="-1"></a><span class="co"># consolidated %&gt;%</span></span>
+<span id="cb54-241"><a href="#cb54-241" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(pos == &quot;PUNCT&quot;) %&gt;%</span></span>
+<span id="cb54-242"><a href="#cb54-242" aria-hidden="true" tabindex="-1"></a><span class="co">#   count(token) %&gt;%</span></span>
+<span id="cb54-243"><a href="#cb54-243" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(desc(n)) %&gt;%</span></span>
+<span id="cb54-244"><a href="#cb54-244" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(-n) %&gt;%</span></span>
+<span id="cb54-245"><a href="#cb54-245" aria-hidden="true" tabindex="-1"></a><span class="co">#   write_csv(&quot;../data/01_leaners.csv&quot;)</span></span>
+<span id="cb54-246"><a href="#cb54-246" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-247"><a href="#cb54-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-250"><a href="#cb54-250" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-251"><a href="#cb54-251" aria-hidden="true" tabindex="-1"></a><span class="co"># consolidated %&gt;%</span></span>
+<span id="cb54-252"><a href="#cb54-252" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(str_detect(token, &quot;’\\w+?&quot;)) %&gt;%</span></span>
+<span id="cb54-253"><a href="#cb54-253" aria-hidden="true" tabindex="-1"></a><span class="co">#   count(token) %&gt;%</span></span>
+<span id="cb54-254"><a href="#cb54-254" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(desc(n)) %&gt;%</span></span>
+<span id="cb54-255"><a href="#cb54-255" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(-n) %&gt;%</span></span>
+<span id="cb54-256"><a href="#cb54-256" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(dir = &quot;&lt;&quot;) %&gt;%</span></span>
+<span id="cb54-257"><a href="#cb54-257" aria-hidden="true" tabindex="-1"></a><span class="co">#   slice(1:7) %&gt;%</span></span>
+<span id="cb54-258"><a href="#cb54-258" aria-hidden="true" tabindex="-1"></a><span class="co">#   write_csv(file = &quot;../data/02_leaners.csv&quot;)</span></span>
+<span id="cb54-259"><a href="#cb54-259" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-260"><a href="#cb54-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-263"><a href="#cb54-263" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-264"><a href="#cb54-264" aria-hidden="true" tabindex="-1"></a><span class="co">#| lavbel: read_in_lean</span></span>
+<span id="cb54-265"><a href="#cb54-265" aria-hidden="true" tabindex="-1"></a>lean_df <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="fu">list.files</span>(<span class="at">path =</span> <span class="st">&quot;../data/&quot;</span>, <span class="at">pattern =</span> <span class="st">&quot;*_leaners.csv&quot;</span>, <span class="at">full.names =</span> T), read_csv)</span>
+<span id="cb54-266"><a href="#cb54-266" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-267"><a href="#cb54-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-268"><a href="#cb54-268" aria-hidden="true" tabindex="-1"></a>After joining on the lean coding, normalize smart quotes. This wasn&#39;t done prior to lean coding so that I *could* code left and right lean for <span class="in">`“`</span> etc.</span>
+<span id="cb54-269"><a href="#cb54-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-272"><a href="#cb54-272" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-273"><a href="#cb54-273" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: code_lean</span></span>
+<span id="cb54-274"><a href="#cb54-274" aria-hidden="true" tabindex="-1"></a>consolidated <span class="sc">%&gt;%</span></span>
+<span id="cb54-275"><a href="#cb54-275" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">id =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">n</span>())<span class="sc">%&gt;%</span></span>
+<span id="cb54-276"><a href="#cb54-276" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(lean_df) <span class="sc">%&gt;%</span></span>
+<span id="cb54-277"><a href="#cb54-277" aria-hidden="true" tabindex="-1"></a>  <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">dir =</span> <span class="st">&quot;&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb54-278"><a href="#cb54-278" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">token =</span> <span class="fu">str_replace_all</span>(token, <span class="st">&quot;[’‘]&quot;</span>, <span class="st">&quot;&#39;&quot;</span>),</span>
+<span id="cb54-279"><a href="#cb54-279" aria-hidden="true" tabindex="-1"></a>         <span class="at">token =</span> <span class="fu">str_replace_all</span>(token, <span class="st">&quot;[“”]&quot;</span>, <span class="st">&#39;&quot;&#39;</span>)) <span class="ot">-&gt;</span> lean_coded</span>
+<span id="cb54-280"><a href="#cb54-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-281"><a href="#cb54-281" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-282"><a href="#cb54-282" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-283"><a href="#cb54-283" aria-hidden="true" tabindex="-1"></a>Now, do actual padding by comment.</span>
+<span id="cb54-284"><a href="#cb54-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-287"><a href="#cb54-287" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-288"><a href="#cb54-288" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: pad</span></span>
+<span id="cb54-289"><a href="#cb54-289" aria-hidden="true" tabindex="-1"></a>lean_coded <span class="sc">%&gt;%</span></span>
+<span id="cb54-290"><a href="#cb54-290" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(id) <span class="sc">%&gt;%</span></span>
+<span id="cb54-291"><a href="#cb54-291" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(doc_id) <span class="sc">%&gt;%</span></span>
+<span id="cb54-292"><a href="#cb54-292" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb54-293"><a href="#cb54-293" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">padded =</span> <span class="fu">map</span>(data, pad_df)) <span class="ot">-&gt;</span> pad_nest</span>
+<span id="cb54-294"><a href="#cb54-294" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-295"><a href="#cb54-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-296"><a href="#cb54-296" aria-hidden="true" tabindex="-1"></a><span class="fu">## Make the Trigram Model</span></span>
+<span id="cb54-297"><a href="#cb54-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-298"><a href="#cb54-298" aria-hidden="true" tabindex="-1"></a>Making the trigrams by lagging <span class="in">`token`</span> 1 and 2 times within comment.</span>
+<span id="cb54-299"><a href="#cb54-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-302"><a href="#cb54-302" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-303"><a href="#cb54-303" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: make_trigrams</span></span>
+<span id="cb54-304"><a href="#cb54-304" aria-hidden="true" tabindex="-1"></a>pad_nest <span class="sc">%&gt;%</span></span>
+<span id="cb54-305"><a href="#cb54-305" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>data) <span class="sc">%&gt;%</span></span>
+<span id="cb54-306"><a href="#cb54-306" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(padded) <span class="sc">%&gt;%</span></span>
+<span id="cb54-307"><a href="#cb54-307" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(doc_id, token, pos, entity_type, dir) <span class="sc">%&gt;%</span></span>
+<span id="cb54-308"><a href="#cb54-308" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(doc_id) <span class="sc">%&gt;%</span></span>
+<span id="cb54-309"><a href="#cb54-309" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">word_i =</span> <span class="fu">lag</span>(token, <span class="dv">2</span>),</span>
+<span id="cb54-310"><a href="#cb54-310" aria-hidden="true" tabindex="-1"></a>         <span class="at">word_j =</span> <span class="fu">lag</span>(token, <span class="dv">1</span>),</span>
+<span id="cb54-311"><a href="#cb54-311" aria-hidden="true" tabindex="-1"></a>         <span class="at">word_k =</span> token) <span class="sc">%&gt;%</span></span>
+<span id="cb54-312"><a href="#cb54-312" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()<span class="ot">-&gt;</span> trigrams</span>
+<span id="cb54-313"><a href="#cb54-313" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-314"><a href="#cb54-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-315"><a href="#cb54-315" aria-hidden="true" tabindex="-1"></a>In order to generate comments from the bigrams, we&#39;ll need to get the conditional probability of <span class="in">`word_k`</span> from the preceding sequence <span class="in">`word_i, word_j`</span>.</span>
+<span id="cb54-316"><a href="#cb54-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-317"><a href="#cb54-317" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb54-318"><a href="#cb54-318" aria-hidden="true" tabindex="-1"></a>P(w_k | w_i,w_j)</span>
+<span id="cb54-319"><a href="#cb54-319" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb54-320"><a href="#cb54-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-321"><a href="#cb54-321" aria-hidden="true" tabindex="-1"></a>To get that probability, we&#39;ll divide the counts of trigrams by the count of bigrams.</span>
+<span id="cb54-322"><a href="#cb54-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-323"><a href="#cb54-323" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb54-324"><a href="#cb54-324" aria-hidden="true" tabindex="-1"></a>P(w_k|w_i,w_j) = \frac{C(w_i, w_j, w_k)}{C(w_i, w_j)}</span>
+<span id="cb54-325"><a href="#cb54-325" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb54-326"><a href="#cb54-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-327"><a href="#cb54-327" aria-hidden="true" tabindex="-1"></a>To do that, I&#39;ll create a bigram count data frame, a trigram count dataframe, and join them.</span>
+<span id="cb54-328"><a href="#cb54-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-331"><a href="#cb54-331" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-332"><a href="#cb54-332" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: bigram_count</span></span>
+<span id="cb54-333"><a href="#cb54-333" aria-hidden="true" tabindex="-1"></a>trigrams <span class="sc">%&gt;%</span></span>
+<span id="cb54-334"><a href="#cb54-334" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb54-335"><a href="#cb54-335" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(word_i, word_j) <span class="sc">%&gt;%</span></span>
+<span id="cb54-336"><a href="#cb54-336" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">bigram_count =</span> n)<span class="ot">-&gt;</span> bigram_count</span>
+<span id="cb54-337"><a href="#cb54-337" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-338"><a href="#cb54-338" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-341"><a href="#cb54-341" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-342"><a href="#cb54-342" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: trigram_count</span></span>
+<span id="cb54-343"><a href="#cb54-343" aria-hidden="true" tabindex="-1"></a>trigrams <span class="sc">%&gt;%</span></span>
+<span id="cb54-344"><a href="#cb54-344" aria-hidden="true" tabindex="-1"></a> <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb54-345"><a href="#cb54-345" aria-hidden="true" tabindex="-1"></a> <span class="fu">count</span>(word_i, word_j, word_k, dir) <span class="sc">%&gt;%</span></span>
+<span id="cb54-346"><a href="#cb54-346" aria-hidden="true" tabindex="-1"></a> <span class="fu">rename</span>(<span class="at">trigram_count =</span> n) <span class="ot">-&gt;</span> trigram_count</span>
+<span id="cb54-347"><a href="#cb54-347" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-348"><a href="#cb54-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-351"><a href="#cb54-351" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-352"><a href="#cb54-352" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: model</span></span>
+<span id="cb54-353"><a href="#cb54-353" aria-hidden="true" tabindex="-1"></a>trigram_count <span class="sc">%&gt;%</span></span>
+<span id="cb54-354"><a href="#cb54-354" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(bigram_count) <span class="sc">%&gt;%</span></span>
+<span id="cb54-355"><a href="#cb54-355" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cond_prob =</span> trigram_count<span class="sc">/</span>bigram_count)<span class="ot">-&gt;</span>model</span>
+<span id="cb54-356"><a href="#cb54-356" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-357"><a href="#cb54-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-358"><a href="#cb54-358" aria-hidden="true" tabindex="-1"></a><span class="fu">## Mockup of Generator</span></span>
+<span id="cb54-359"><a href="#cb54-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-360"><a href="#cb54-360" aria-hidden="true" tabindex="-1"></a>Generating continuer from the data.</span>
+<span id="cb54-361"><a href="#cb54-361" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-364"><a href="#cb54-364" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-365"><a href="#cb54-365" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: gen_1</span></span>
+<span id="cb54-366"><a href="#cb54-366" aria-hidden="true" tabindex="-1"></a>model <span class="sc">%&gt;%</span></span>
+<span id="cb54-367"><a href="#cb54-367" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(word_i <span class="sc">==</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, word_j <span class="sc">==</span> <span class="st">&quot;&lt;s&gt;&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb54-368"><a href="#cb54-368" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_n</span>(<span class="at">size =</span> <span class="dv">1</span>, <span class="at">weight =</span> cond_prob)</span>
+<span id="cb54-369"><a href="#cb54-369" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-370"><a href="#cb54-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-371"><a href="#cb54-371" aria-hidden="true" tabindex="-1"></a>The actual site will generate comments using javascript, but this is a mockup to explore what&#39;s necessary.</span>
+<span id="cb54-372"><a href="#cb54-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-375"><a href="#cb54-375" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-376"><a href="#cb54-376" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: generate_fun</span></span>
+<span id="cb54-377"><a href="#cb54-377" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; generate a sequence from a trigram model df</span></span>
+<span id="cb54-378"><a href="#cb54-378" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; </span></span>
+<span id="cb54-379"><a href="#cb54-379" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param df The data frame containing the trigram model</span></span>
+<span id="cb54-380"><a href="#cb54-380" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param w_i The n-2th word</span></span>
+<span id="cb54-381"><a href="#cb54-381" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param w_j The n-1th word</span></span>
+<span id="cb54-382"><a href="#cb54-382" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param max a max length of a comment</span></span>
+<span id="cb54-383"><a href="#cb54-383" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; </span></span>
+<span id="cb54-384"><a href="#cb54-384" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @returns A concatenated comment string</span></span>
+<span id="cb54-385"><a href="#cb54-385" aria-hidden="true" tabindex="-1"></a>generate <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">w_i =</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, <span class="at">w_j =</span> <span class="st">&quot;&lt;s&gt;&quot;</span>, <span class="at">max =</span> <span class="dv">10000</span>){</span>
+<span id="cb54-386"><a href="#cb54-386" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">vector</span>()</span>
+<span id="cb54-387"><a href="#cb54-387" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb54-388"><a href="#cb54-388" aria-hidden="true" tabindex="-1"></a>  stop <span class="ot">=</span> <span class="cn">FALSE</span></span>
+<span id="cb54-389"><a href="#cb54-389" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(x <span class="sc">&lt;</span> max <span class="sc">&amp;</span> <span class="sc">!</span>stop){</span>
+<span id="cb54-390"><a href="#cb54-390" aria-hidden="true" tabindex="-1"></a>    sample <span class="ot">=</span> df <span class="sc">%&gt;%</span> </span>
+<span id="cb54-391"><a href="#cb54-391" aria-hidden="true" tabindex="-1"></a>                <span class="fu">filter</span>(word_i <span class="sc">==</span> w_i, word_j <span class="sc">==</span> w_j) <span class="sc">%&gt;%</span> </span>
+<span id="cb54-392"><a href="#cb54-392" aria-hidden="true" tabindex="-1"></a>                <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">weight_by =</span> cond_prob)</span>
+<span id="cb54-393"><a href="#cb54-393" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(sample<span class="sc">$</span>word_k <span class="sc">==</span> <span class="st">&quot;&lt;/s&gt;&quot;</span>) {</span>
+<span id="cb54-394"><a href="#cb54-394" aria-hidden="true" tabindex="-1"></a>      stop <span class="ot">=</span> <span class="cn">TRUE</span></span>
+<span id="cb54-395"><a href="#cb54-395" aria-hidden="true" tabindex="-1"></a>      <span class="cf">break</span></span>
+<span id="cb54-396"><a href="#cb54-396" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb54-397"><a href="#cb54-397" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(out) <span class="sc">==</span> <span class="dv">0</span>){</span>
+<span id="cb54-398"><a href="#cb54-398" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> <span class="fu">str_to_title</span>(sample<span class="sc">$</span>word_k)</span>
+<span id="cb54-399"><a href="#cb54-399" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span> <span class="cf">if</span> (w_j <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;.&quot;</span>, <span class="st">&quot;?&quot;</span>, <span class="st">&quot;!&quot;</span>)){</span>
+<span id="cb54-400"><a href="#cb54-400" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> <span class="fu">str_to_title</span>(sample<span class="sc">$</span>word_k)</span>
+<span id="cb54-401"><a href="#cb54-401" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
+<span id="cb54-402"><a href="#cb54-402" aria-hidden="true" tabindex="-1"></a>      paste_word <span class="ot">=</span> sample<span class="sc">$</span>word_k</span>
+<span id="cb54-403"><a href="#cb54-403" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb54-404"><a href="#cb54-404" aria-hidden="true" tabindex="-1"></a>    left_side <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb54-405"><a href="#cb54-405" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(out) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
+<span id="cb54-406"><a href="#cb54-406" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(<span class="fu">rev</span>(out)[<span class="dv">1</span>] <span class="sc">==</span> <span class="st">&quot;&quot;</span>){</span>
+<span id="cb54-407"><a href="#cb54-407" aria-hidden="true" tabindex="-1"></a>        left_side <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb54-408"><a href="#cb54-408" aria-hidden="true" tabindex="-1"></a>      }<span class="cf">else</span> <span class="cf">if</span>(<span class="fu">str_detect</span>(sample<span class="sc">$</span>dir, <span class="st">&quot;&lt;&quot;</span>)){</span>
+<span id="cb54-409"><a href="#cb54-409" aria-hidden="true" tabindex="-1"></a>        left_side <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb54-410"><a href="#cb54-410" aria-hidden="true" tabindex="-1"></a>      }<span class="cf">else</span>{</span>
+<span id="cb54-411"><a href="#cb54-411" aria-hidden="true" tabindex="-1"></a>        left_side <span class="ot">&lt;-</span> <span class="st">&quot; &quot;</span></span>
+<span id="cb54-412"><a href="#cb54-412" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb54-413"><a href="#cb54-413" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb54-414"><a href="#cb54-414" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">str_detect</span>(sample<span class="sc">$</span>dir, <span class="st">&quot;&gt;&quot;</span>)){</span>
+<span id="cb54-415"><a href="#cb54-415" aria-hidden="true" tabindex="-1"></a>      right_side <span class="ot">&lt;-</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb54-416"><a href="#cb54-416" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
+<span id="cb54-417"><a href="#cb54-417" aria-hidden="true" tabindex="-1"></a>      right_side <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb54-418"><a href="#cb54-418" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb54-419"><a href="#cb54-419" aria-hidden="true" tabindex="-1"></a>    out <span class="ot">&lt;-</span> <span class="fu">c</span>(out, left_side, paste_word, right_side)</span>
+<span id="cb54-420"><a href="#cb54-420" aria-hidden="true" tabindex="-1"></a>    w_i <span class="ot">=</span> w_j</span>
+<span id="cb54-421"><a href="#cb54-421" aria-hidden="true" tabindex="-1"></a>    w_j <span class="ot">=</span> sample<span class="sc">$</span>word_k</span>
+<span id="cb54-422"><a href="#cb54-422" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">=</span> x<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb54-423"><a href="#cb54-423" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb54-424"><a href="#cb54-424" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">str_c</span>(out, <span class="at">collapse =</span> <span class="st">&quot;&quot;</span>))</span>
+<span id="cb54-425"><a href="#cb54-425" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb54-426"><a href="#cb54-426" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-427"><a href="#cb54-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-430"><a href="#cb54-430" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-431"><a href="#cb54-431" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: sample_gen</span></span>
+<span id="cb54-432"><a href="#cb54-432" aria-hidden="true" tabindex="-1"></a><span class="fu">generate</span>(model)</span>
+<span id="cb54-433"><a href="#cb54-433" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-434"><a href="#cb54-434" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-435"><a href="#cb54-435" aria-hidden="true" tabindex="-1"></a><span class="fu">## Prepare model for json</span></span>
+<span id="cb54-436"><a href="#cb54-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-437"><a href="#cb54-437" aria-hidden="true" tabindex="-1"></a>The model needs to be re-represented as a json file to be processed for the site. We decided on the schema</span>
+<span id="cb54-438"><a href="#cb54-438" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-439"><a href="#cb54-439" aria-hidden="true" tabindex="-1"></a><span class="in">``` {.json filename=&quot;model_schema.json&quot;}</span></span>
+<span id="cb54-440"><a href="#cb54-440" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb54-441"><a href="#cb54-441" aria-hidden="true" tabindex="-1"></a>  <span class="dt">w_i</span> <span class="op">:</span> {</span>
+<span id="cb54-442"><a href="#cb54-442" aria-hidden="true" tabindex="-1"></a>    <span class="dt">w_j</span> <span class="op">:</span> {</span>
+<span id="cb54-443"><a href="#cb54-443" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;next_word&quot;</span><span class="op">:</span> [string<span class="op">,</span> string<span class="op">,</span> string<span class="op">,</span> <span class="op">...</span>]<span class="op">,</span></span>
+<span id="cb54-444"><a href="#cb54-444" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;sum_prob&quot;</span><span class="op">:</span> [float<span class="op">,</span> float float<span class="op">,</span> <span class="op">...</span>]<span class="op">,</span></span>
+<span id="cb54-445"><a href="#cb54-445" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;cond_prob&quot;</span><span class="op">:</span> [float<span class="op">,</span> float<span class="op">,</span> float<span class="op">,</span> <span class="op">...</span>]<span class="op">,</span></span>
+<span id="cb54-446"><a href="#cb54-446" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;lean&quot;</span><span class="op">:</span> [string<span class="op">,</span> string<span class="op">,</span> string<span class="op">,</span> <span class="op">...</span>]</span>
+<span id="cb54-447"><a href="#cb54-447" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb54-448"><a href="#cb54-448" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb54-449"><a href="#cb54-449" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb54-450"><a href="#cb54-450" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-451"><a href="#cb54-451" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-454"><a href="#cb54-454" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-455"><a href="#cb54-455" aria-hidden="true" tabindex="-1"></a>verboten <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;.&quot;</span>, <span class="st">&quot;#&quot;</span>, <span class="st">&quot;$&quot;</span>, <span class="st">&quot;/&quot;</span>, <span class="st">&quot;[&quot;</span>, <span class="st">&quot;]&quot;</span>)</span>
+<span id="cb54-456"><a href="#cb54-456" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-457"><a href="#cb54-457" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-458"><a href="#cb54-458" aria-hidden="true" tabindex="-1"></a>Firebase Realtime Database forbids special characters in <span class="in">`verboten`</span> in object keys. Replacing with special labels.</span>
+<span id="cb54-459"><a href="#cb54-459" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-462"><a href="#cb54-462" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-463"><a href="#cb54-463" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: pre_probs</span></span>
+<span id="cb54-464"><a href="#cb54-464" aria-hidden="true" tabindex="-1"></a>model <span class="sc">%&gt;%</span></span>
+<span id="cb54-465"><a href="#cb54-465" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb54-466"><a href="#cb54-466" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="at">.cols =</span> word_i<span class="sc">:</span>word_k, <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.&quot;</span>, <span class="st">&quot;&lt;dot&gt;&quot;</span>)),</span>
+<span id="cb54-467"><a href="#cb54-467" aria-hidden="true" tabindex="-1"></a>         <span class="fu">across</span>(<span class="at">.cols =</span> word_i<span class="sc">:</span>word_k, <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="st">&quot;/&quot;</span>, <span class="st">&quot;&lt;slash&gt;&quot;</span>)),</span>
+<span id="cb54-468"><a href="#cb54-468" aria-hidden="true" tabindex="-1"></a>         <span class="fu">across</span>(<span class="at">.cols =</span> word_i<span class="sc">:</span>word_k, <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">$&quot;</span>, <span class="st">&quot;&lt;dollar&gt;&quot;</span>)),</span>
+<span id="cb54-469"><a href="#cb54-469" aria-hidden="true" tabindex="-1"></a>         <span class="fu">across</span>(<span class="at">.cols =</span> word_i<span class="sc">:</span>word_k, <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="st">&quot;#&quot;</span>, <span class="st">&quot;&lt;hash&gt;&quot;</span>)),</span>
+<span id="cb54-470"><a href="#cb54-470" aria-hidden="true" tabindex="-1"></a>         <span class="fu">across</span>(<span class="at">.cols =</span> word_i<span class="sc">:</span>word_k, <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">[&quot;</span>, <span class="st">&quot;&lt;lbracket&gt;&quot;</span>)),</span>
+<span id="cb54-471"><a href="#cb54-471" aria-hidden="true" tabindex="-1"></a>         <span class="fu">across</span>(<span class="at">.cols =</span> word_i<span class="sc">:</span>word_k, <span class="at">.fns =</span> <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">]&quot;</span>, <span class="st">&quot;&lt;rbracket&gt;&quot;</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb54-472"><a href="#cb54-472" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_i, word_j) <span class="sc">%&gt;%</span></span>
+<span id="cb54-473"><a href="#cb54-473" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(cond_prob) <span class="sc">%&gt;%</span></span>
+<span id="cb54-474"><a href="#cb54-474" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sum_prob =</span> <span class="fu">cumsum</span>(cond_prob))<span class="ot">-&gt;</span>model_prep</span>
+<span id="cb54-475"><a href="#cb54-475" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-476"><a href="#cb54-476" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-479"><a href="#cb54-479" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-480"><a href="#cb54-480" aria-hidden="true" tabindex="-1"></a>model_prep <span class="sc">%&gt;%</span></span>
+<span id="cb54-481"><a href="#cb54-481" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(word_j <span class="sc">==</span> <span class="st">&quot;&lt;/s&gt;&quot;</span>)</span>
+<span id="cb54-482"><a href="#cb54-482" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-483"><a href="#cb54-483" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-486"><a href="#cb54-486" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-487"><a href="#cb54-487" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: empty_list</span></span>
+<span id="cb54-488"><a href="#cb54-488" aria-hidden="true" tabindex="-1"></a>outer_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb54-489"><a href="#cb54-489" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-490"><a href="#cb54-490" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-493"><a href="#cb54-493" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-494"><a href="#cb54-494" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: nest_model</span></span>
+<span id="cb54-495"><a href="#cb54-495" aria-hidden="true" tabindex="-1"></a>model_prep <span class="sc">%&gt;%</span></span>
+<span id="cb54-496"><a href="#cb54-496" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_i, word_j) <span class="sc">%&gt;%</span></span>
+<span id="cb54-497"><a href="#cb54-497" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb54-498"><a href="#cb54-498" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word_i) <span class="sc">%&gt;%</span></span>
+<span id="cb54-499"><a href="#cb54-499" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="ot">-&gt;</span> all_nest</span>
+<span id="cb54-500"><a href="#cb54-500" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-501"><a href="#cb54-501" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-504"><a href="#cb54-504" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-505"><a href="#cb54-505" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: nest_to_list</span></span>
+<span id="cb54-506"><a href="#cb54-506" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_along</span>(all_nest<span class="sc">$</span>word_i)){</span>
+<span id="cb54-507"><a href="#cb54-507" aria-hidden="true" tabindex="-1"></a>  w_i <span class="ot">&lt;-</span> all_nest<span class="sc">$</span>word_i[i]</span>
+<span id="cb54-508"><a href="#cb54-508" aria-hidden="true" tabindex="-1"></a>  outer_list[[w_i]] <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb54-509"><a href="#cb54-509" aria-hidden="true" tabindex="-1"></a>  inner_j <span class="ot">&lt;-</span> all_nest<span class="sc">$</span>data[[i]]</span>
+<span id="cb54-510"><a href="#cb54-510" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="fu">seq_along</span>(inner_j<span class="sc">$</span>word_j)){</span>
+<span id="cb54-511"><a href="#cb54-511" aria-hidden="true" tabindex="-1"></a>    w_j <span class="ot">&lt;-</span> inner_j<span class="sc">$</span>word_j[j]</span>
+<span id="cb54-512"><a href="#cb54-512" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]] <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb54-513"><a href="#cb54-513" aria-hidden="true" tabindex="-1"></a>    inner_k <span class="ot">&lt;-</span> inner_j<span class="sc">$</span>data[[j]]</span>
+<span id="cb54-514"><a href="#cb54-514" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb54-515"><a href="#cb54-515" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;next_word&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>word_k</span>
+<span id="cb54-516"><a href="#cb54-516" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;sum_prob&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>sum_prob</span>
+<span id="cb54-517"><a href="#cb54-517" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;cond_prob&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>cond_prob</span>
+<span id="cb54-518"><a href="#cb54-518" aria-hidden="true" tabindex="-1"></a>    outer_list[[w_i]][[w_j]][[<span class="st">&quot;lean&quot;</span>]] <span class="ot">&lt;-</span> inner_k<span class="sc">$</span>dir</span>
+<span id="cb54-519"><a href="#cb54-519" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb54-520"><a href="#cb54-520" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb54-521"><a href="#cb54-521" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-522"><a href="#cb54-522" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-525"><a href="#cb54-525" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-526"><a href="#cb54-526" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: convert_list_to_json</span></span>
+<span id="cb54-527"><a href="#cb54-527" aria-hidden="true" tabindex="-1"></a>jsonData <span class="ot">&lt;-</span> <span class="fu">toJSON</span>(outer_list, <span class="at">indent =</span> <span class="dv">2</span>)</span>
+<span id="cb54-528"><a href="#cb54-528" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb54-529"><a href="#cb54-529" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-532"><a href="#cb54-532" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb54-533"><a href="#cb54-533" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb54-534"><a href="#cb54-534" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: write_json_file</span></span>
+<span id="cb54-535"><a href="#cb54-535" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(jsonData, <span class="at">file =</span> <span class="st">&quot;../data/model.json&quot;</span>)</span>
+<span id="cb54-536"><a href="#cb54-536" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

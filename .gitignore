@@ -1,8 +1,11 @@
-# Data file from OTT Combined Codes Airtable base
-Codes Summed-Main View.csv
+# Firebase
+.firebase
 
 # Python environment
 venv
+
+# IDE
+.vscode
 
 # dependencies
 /node_modules
