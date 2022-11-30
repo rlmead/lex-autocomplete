@@ -1,0 +1,3 @@
+# Store data files here (they won't be tracked in the repo)
+*
+!.gitignore
